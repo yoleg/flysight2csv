@@ -32,8 +32,7 @@
 
 ---
 
-**Source Code
-**: <a href="https://github.com/yoleg/flysight2csv" target="_blank">https://github.com/yoleg/flysight2csv </a>
+**Source Code**: <a href="https://github.com/yoleg/flysight2csv" target="_blank">https://github.com/yoleg/flysight2csv </a>
 
 ---
 
