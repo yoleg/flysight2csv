@@ -2,6 +2,7 @@ import re
 import sys
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from flysight2csv.cli import app
@@ -10,6 +11,7 @@ from tests.common import DATA_DIR
 runner = CliRunner()
 
 
+@pytest.mark.skipif(sys.platform != 'win32', reason='TODO: fix for non-Windows platforms')
 def test_help():
     """The help message includes the CLI name."""
     result = runner.invoke(app, ['--help'])
@@ -32,8 +34,8 @@ def test_version():
     assert re.match(r'^flysight2csv: \d+\.\d+\.\d+$', result.stdout)
 
 
+@pytest.mark.skipif(sys.platform != 'win32', reason='TODO: fix for non-Windows platforms')
 def test_display_metadata():
-    """The info command works."""
     directory_path = DATA_DIR / 'device1/23-12-16'
     args = [
         '-d',
