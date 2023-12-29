@@ -1,4 +1,5 @@
 import re
+import sys
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -44,9 +45,13 @@ def test_display_metadata():
         args,
     )
     assert result.exit_code == 0
-    lines = result.stdout.splitlines(keepends=False)
+    stdout = result.stdout
+    # convert path separators to allow tests to run on Windows
+    if sys.platform == 'win32':
+        stdout = stdout.replace('\\', '/')
+    lines = stdout.splitlines(keepends=False)
     assert lines == [
-        'data\\device1\\23-12-16\\23-21-02\\SENSOR.CSV',
+        'data/device1/23-12-16/23-21-02/SENSOR.CSV',
         '    Vars:',
         '        FIRMWARE_VER: v2023.07.01',
         '        DEVICE_ID: 003b00555752501920313652',
@@ -60,7 +65,7 @@ def test_display_metadata():
         '        TIME: time (s), tow (s), week ( - )',
         '        VBAT: time (s), voltage (volt)',
         '',
-        'data\\device1\\23-12-16\\23-21-02\\TRACK.CSV',
+        'data/device1/23-12-16/23-21-02/TRACK.CSV',
         '    Vars:',
         '        FIRMWARE_VER: v2023.07.01',
         '        DEVICE_ID: 003b00555752501920313652',
@@ -69,7 +74,7 @@ def test_display_metadata():
         '        GNSS: time ( - ), lat (deg), lon (deg), hMSL (m), velN (m/s), velE ',
         '(m/s), velD (m/s), hAcc (m), vAcc (m), sAcc (m/s), numSV ( - )',
         '',
-        'data\\device1\\23-12-16\\23-37-27\\SENSOR.CSV',
+        'data/device1/23-12-16/23-37-27/SENSOR.CSV',
         '    Vars:',
         '        FIRMWARE_VER: v2023.07.01',
         '        DEVICE_ID: 003b00555752501920313652',
@@ -83,7 +88,7 @@ def test_display_metadata():
         '        TIME: time (s), tow (s), week ( - )',
         '        VBAT: time (s), voltage (volt)',
         '',
-        'data\\device1\\23-12-16\\23-37-27\\TRACK.CSV',
+        'data/device1/23-12-16/23-37-27/TRACK.CSV',
         '    Vars:',
         '        FIRMWARE_VER: v2023.07.01',
         '        DEVICE_ID: 003b00555752501920313652',
