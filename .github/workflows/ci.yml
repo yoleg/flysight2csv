@@ -69,7 +69,7 @@ jobs:
       - commitlint
 
     runs-on: ubuntu-latest
-    # TODO: environment: release
+    environment: release
     concurrency: release
     permissions:
       id-token: write
