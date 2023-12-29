@@ -1,0 +1,4 @@
+# Set test data as binary to avoid modification.
+tests/data/**/*.csv binary
+tests/data/**/*.CSV binary
+tests/data/**/*.jsonl binary
