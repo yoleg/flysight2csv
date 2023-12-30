@@ -99,25 +99,25 @@ Once that completes, reopen your terminal and run `flysight2csv --help` to confi
 By default, the command simply lists out all the CSV files it finds with a valid FlySight 2 format:
 
 ```shell
-flysight2csv.cmd paths/to/files.csv /or/directories/
+flysight2csv paths/to/files.csv /or/directories/
 ```
 
 Copy the files to a new directory, prepending the date and time to the filename:
 
 ```shell
-flysight2csv.cmd source/paths/ -o output/path/
+flysight2csv source/paths/ -o output/path/
 ```
 
 Reformat the copied files into a "flat" CSV (single header) for use with other tools:
 
 ```shell
-flysight2csv.cmd source/paths/ -o output/path/ -f csv-flat
+flysight2csv source/paths/ -o output/path/ -f csv-flat
 ```
 
 For more options, see the help:
 
 ```shell
-flysight2csv.cmd --help
+flysight2csv --help
 ```
 
 ## Troubleshooting
