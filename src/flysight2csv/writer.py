@@ -107,4 +107,7 @@ def _select_columns(
     iter_data_columns = parsed.meta.iter_column_names(selection=columns, sensors=sensors)
     iter_meta_columns = filter_strings(ROW_META_FIELDS, selection=columns)
     selected_columns = list(chain(iter_meta_columns, iter_data_columns))
+    if len(selected_columns) != len(set(selected_columns)):
+        duplicates = sorted(x for x in selected_columns if selected_columns.count(x) > 1)
+        raise Exception(f'Duplicate column names found: {duplicates}')
     return selected_columns

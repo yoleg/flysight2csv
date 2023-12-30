@@ -115,10 +115,17 @@ class CSVMeta:
         :param selection: If specified, only return column names that match the selection.
         :param sensors: If specified, only return column names for the sensors matching the selection.
         """
+        yielded = set()
         for sensor, columns in self.columns.items():
             if sensors and not sensors.matches(sensor):
                 continue
-            yield from (x for x in columns if selection is None or selection.matches(x))
+            for column in columns:
+                if column in yielded:
+                    continue
+                if selection and not selection.matches(column):
+                    continue
+                yielded.add(column)
+                yield column
 
     def __repr__(self) -> str:
         """Simple repr for debugging."""
