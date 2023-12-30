@@ -80,6 +80,11 @@ match = "main"
 match = "(?!main$)"
 prerelease = true
 
+[tool.semantic_release.commit_parser_options]
+allowed_tags = ["build", "chore", "ci", "docs", "feat", "fix", "perf", "style", "refactor", "test"]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
+
 [tool.pytest.ini_options]
 addopts = "-v"
 filterwarnings = ["error", "default::DeprecationWarning:.*"]
