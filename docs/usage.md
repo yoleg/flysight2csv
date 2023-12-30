@@ -4,14 +4,26 @@
 
 Assuming that you've followed the {ref}`installations steps <installation>`, you're now ready to use this package.
 
-Call the command line interface:
+By default, the command simply lists out all the CSV files it finds with a valid FlySight 2 format:
 
-```bash
-flysight2csv --help
+```shell
+flysight2csv paths/to/files.csv /or/directories/
 ```
 
-Print some metadata about a FlySight 2 CSV file:
+Copy the files to a new directory, prepending the date and time to the filename:
 
-```bash
-flysight2csv info path/to/file.csv
+```shell
+flysight2csv source/paths/ -o output/path/
+```
+
+Reformat the copied files into a "flat" CSV (single header) for use with other tools:
+
+```shell
+flysight2csv source/paths/ -o output/path/ -f csv-flat
+```
+
+For more options, see the help:
+
+```shell
+flysight2csv --help
 ```
