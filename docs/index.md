@@ -1,4 +1,4 @@
-# Welcome to FlySight2CSV documentation!
+# Welcome to flysight2csv documentation!
 
 ```{toctree}
 :caption: Installation & Usage

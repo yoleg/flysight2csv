@@ -1,4 +1,4 @@
-# FlySight2CSV
+# flysight2csv
 
 <p align="center">
   <a href="https://github.com/yoleg/flysight2csv/actions/workflows/ci.yml?query=branch%3Amain">
@@ -31,6 +31,8 @@
 </p>
 
 ---
+
+**Documentation**: <a href="https://flysight2csv.readthedocs.io" target="_blank">https://flysight2csv.readthedocs.io </a>
 
 **Source Code**: <a href="https://github.com/yoleg/flysight2csv" target="_blank">https://github.com/yoleg/flysight2csv </a>
 

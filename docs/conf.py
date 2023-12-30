@@ -4,7 +4,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # Project information
-project = "FlySight2CSV"
+project = "flysight2csv"
 copyright = "2023, Oleg Pryadko"
 author = "Oleg Pryadko"
 release = "0.1.1"

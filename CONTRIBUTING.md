@@ -24,7 +24,7 @@ Look through the GitHub issues for features. Anything tagged with "enhancement" 
 
 ### Write Documentation
 
-FlySight2CSV could always use more documentation, whether as part of the official FlySight2CSV docs, in docstrings, or even on the web in blog posts, articles, and such.
+flysight2csv could always use more documentation, whether as part of the official flysight2csv docs, in docstrings, or even on the web in blog posts, articles, and such.
 
 ### Submit Feedback
 
