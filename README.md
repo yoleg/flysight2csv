@@ -40,7 +40,7 @@
 
 Utilities for finding and reformatting FlySight 2 CSV files (SENSOR.CSV and TRACK.CSV).
 
-:bulb: This is an early release. Please let me know how you use this tool and what features you would like to see.
+💡 This is an early release. Please let me know how you use this tool and what features you would like to see.
 
 ## Features
 
@@ -87,12 +87,12 @@ Then, install `flysight2csv` via pip (or your favourite Python package manager):
 
 `pip install flysight2csv`
 
-:bulb: TIP: Consider using [pipx](https://pipxproject.github.io/pipx/) or a
+💡 TIP: Consider using [pipx](https://pipxproject.github.io/pipx/) or a
 [virtual environment](https://docs.python.org/3/tutorial/venv.html) to avoid installing packages globally.
 
 Once that completes, reopen your terminal and run `flysight2csv --help` to confirm it is installed correctly.
 
-:bulb: Additional help with `pip` is available at the [pip documentation](https://pip.pypa.io/en/stable/installation/).
+💡 Additional help with `pip` is available at the [pip documentation](https://pip.pypa.io/en/stable/installation/).
 
 ## Usage
 
