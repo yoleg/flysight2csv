@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 import dataclasses
-import logging
-import re
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+import logging
 from pathlib import Path, PurePath
+import re
 from typing import Any, Iterable
 
 from flysight2csv.parsed_csv import CSVMeta, DataRow, DataRowMeta, ParsedCSV

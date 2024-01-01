@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 import dataclasses
-import itertools
 from dataclasses import dataclass, field
 from datetime import datetime
+import itertools
 from pathlib import PurePath
 from typing import Any, Callable, Iterable, MutableMapping
 

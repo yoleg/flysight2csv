@@ -4,9 +4,9 @@ A few simple output formats.
 NOTE: These are not intended to be exhaustive. Use pandas dataframes for more complex output.
 """
 import csv
-import json
 from datetime import datetime
 from itertools import chain
+import json
 from pathlib import Path
 from typing import Any, Callable, Iterable, MutableMapping, Optional, TextIO
 

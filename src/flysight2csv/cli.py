@@ -3,18 +3,18 @@ flysight2csv command line interface.
 
 Still a work in progress.
 """
-import logging
-import sys
-import traceback
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+import logging
 from pathlib import Path
+import sys
+import traceback
 from typing import Annotated, Any, Iterable, Optional
 
-import typer
 from rich import print as color_print
 from rich.logging import RichHandler
+import typer
 from typer import Argument, Option
 
 from flysight2csv.csv import FLYSIGHT_CSV_DIALOG

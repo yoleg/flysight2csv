@@ -1,5 +1,5 @@
-import re
 from dataclasses import dataclass
+import re
 from typing import Iterable, Optional, Pattern
 
 
