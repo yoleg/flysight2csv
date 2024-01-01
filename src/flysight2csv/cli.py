@@ -1,274 +1,263 @@
-"""
-flysight2csv command line interface.
-
-Still a work in progress.
-"""
-import logging
-import sys
-import traceback
-from dataclasses import dataclass
+"""Command-line interface for flysight2csv."""
+import argparse
+import csv
 from datetime import datetime
-from enum import Enum
+import logging
 from pathlib import Path
-from typing import Annotated, Any, Iterable, Optional
+from typing import Any, Tuple
 
-import typer
-from rich import print as color_print
-from rich.logging import RichHandler
-from typer import Argument, Option
+import rich.console
+import simplejson
+from rich.default_styles import DEFAULT_STYLES
+import rich.logging
+from rich.style import Style
+from rich.theme import Theme
+from rich_argparse import ArgumentDefaultsRichHelpFormatter
 
-from flysight2csv.csv import FLYSIGHT_CSV_DIALOG
-from flysight2csv.finder import iter_matching_files
-from flysight2csv.parsed_csv import CSVMeta
-from flysight2csv.parser import ParserOptions, UnexpectedFormatError, get_metadata, parse_csv
-from flysight2csv.selection import StringSelection
+from flysight2csv.const import FLYSIGHT_CSV_DIALOG
+from flysight2csv.program import (
+    BadParameterError,
+    DEFAULT_GLOB_PATTERNS,
+    FileProcessingError,
+    Program,
+    PROGRAM_NAME,
+    WarningEncounteredError,
+)
+from flysight2csv.program_params import FileFormats, InfoTypes, ProgramParams
 from flysight2csv.version import __version__
-from flysight2csv.writer import NothingToWriteError, Writer
 
-PROGRAM_NAME = 'flysight2csv'
-GLOB_SENSOR_CSV = '**/*SENSOR.CSV'
-GLOB_TRACK_CSV = '**/*TRACK.CSV'
-DEFAULT_GLOB_PATTERNS = [GLOB_TRACK_CSV, GLOB_SENSOR_CSV]
-
-app = typer.Typer(name=PROGRAM_NAME, pretty_exceptions_enable=False)
 logger = logging.getLogger(PROGRAM_NAME)
+# noinspection PyUnresolvedReferences,PyProtectedMember
+ArgumentGroup = argparse._ArgumentGroup
+
+RICH_STYLES = DEFAULT_STYLES | {
+    "logging.level.notset": Style(dim=True),
+    "logging.level.debug": Style(color="blue", bold=True, dim=True),
+    "logging.level.info": Style(color="cyan", bold=True),
+    "logging.level.warning": Style(color="yellow", bold=True),
+    "logging.level.error": Style(color="red", bold=True),
+    "logging.level.critical": Style(color="red", bold=True, reverse=True),
+}
+RICH_THEME = Theme(
+    RICH_STYLES,
+    inherit=True,
+)
 
 
-def print(*objects: Any) -> None:
-    """Print to stdout with color."""
-    color_print(*objects, flush=True, file=sys.stdout)
+# TODO: generate command-line from params dataclasses
+def get_argument_parser() -> Tuple[argparse.ArgumentParser, dict[str, ArgumentGroup]]:
+    """Get the argument parser."""
+    # noinspection PyUnresolvedReferences
+    all_info_types: list[str] = [x.value for x in InfoTypes]
+    # noinspection PyUnresolvedReferences
+    all_file_formats: list[str] = [x.value for x in FileFormats]
+
+    # Create the parser
+    parser = argparse.ArgumentParser(
+        prog=PROGRAM_NAME,
+        description="Utility for working with FlySight 2 CSV files.",
+        formatter_class=ArgumentDefaultsRichHelpFormatter,
+    )
+    parser.add_argument("--version", action="version", version=__version__, help="display the version and exit.")
+
+    groups = {}
+
+    # FinderParams Section
+    finder_group = parser.add_argument_group("File Discovery")
+    finder_group.add_argument(
+        "files_or_directories",
+        metavar="FILE_OR_DIR",
+        type=Path,
+        nargs="+",
+        help="Files or directories to process.",
+    )
+    finder_group.add_argument(
+        "--glob",
+        "--glob-patterns",
+        dest="glob_patterns",
+        metavar="PATTERN",
+        nargs="+",
+        help="Glob patterns to match.",
+        default=DEFAULT_GLOB_PATTERNS,
+    )
+    finder_group.add_argument(
+        "-i",
+        "--info",
+        "--info-type",
+        dest="info_type",
+        choices=all_info_types,
+        default=InfoTypes.path.value,
+        help="The type of information to display about each discovered file.",
+    )
+    groups["finder"] = finder_group
+
+    # ParserOptions Section
+    parser_group = parser.add_argument_group("Parser Options")
+    parser_group.add_argument(
+        "--display-path-levels", metavar="INT", type=int, default=3, help="The number of path levels to display."
+    )
+    parser_group.add_argument("--metadata-only", action="store_true", help="Display metadata only.")
+    parser_group.add_argument(
+        "--offset-datetime",
+        metavar="DATETIME",
+        type=lambda s: datetime.fromisoformat(s) if s else None,
+        help="Force this offset datetime instead of auto-detecting from $TIME columns.",
+    )
+    parser_group.add_argument(
+        "--continue-on-format-error",
+        action="store_true",
+        help="Continue attempting to parse the file even if there are format errors.",
+    )
+    parser_group.add_argument("--ignore-all-format-errors", action="store_true", help="Ignore all format errors.")
+    parser_group.add_argument(
+        "--ignored-format-errors", metavar="MESSAGE", nargs="+", help="Ignore these format error messages."
+    )
+    groups["parser"] = parser_group
+
+    output_path_group = parser.add_argument_group("Output Path")
+    output_path_group.add_argument(
+        "--output-directory",
+        "-o",
+        metavar="PATH",
+        type=Path,
+        default=None,
+        help="Directory to copy files to. Required for the --format option.",
+    )
+    output_path_group.add_argument(
+        "--output-path-levels",
+        metavar="INT",
+        type=int,
+        default=3,
+        help="The number of path names to join into the new file name.",
+    )
+    output_path_group.add_argument(
+        "--output-path-separator",
+        dest="output_path_separator",
+        default="-",
+        help="Join directories to file name with this separator. Use / to preserve directory structure.",
+    )
+    output_path_group.add_argument(
+        "--no-merge",
+        help="Do not also merge files from a single directory. Conflicts with --only-merge.",
+        action="store_false",
+        dest="merge",
+    )
+    output_path_group.add_argument(
+        "--only-merge", help="Do not write non-merged files. Conflicts with --no-merge.", action="store_true"
+    )
+    output_path_group.add_argument(
+        "--merged-name",
+        metavar="NAME",
+        help="The name of the merged file. NOTE: also affected by --output-path-levels.",
+        default="MERGED.CSV",
+    )
+    groups["output"] = output_path_group
+
+    # ReformatParams Section
+    reformat_group = parser.add_argument_group("Reformatting")
+    reformat_group.add_argument(
+        "--format",
+        "-f",
+        dest="output_format",
+        choices=all_file_formats,
+        default=FileFormats.unchanged.value,
+        help="The output file format.",
+    )
+    reformat_group.add_argument(
+        "--csv-dialect", choices=csv.list_dialects(), default=FLYSIGHT_CSV_DIALOG, help="CSV dialect."
+    )
+    reformat_group.add_argument(
+        "--sensors", metavar="SENSOR", dest="sensors_select", nargs="+", help="Filter data to just these sensors."
+    )
+    reformat_group.add_argument(
+        "--columns", metavar="COLUMN", dest="columns_select", nargs="+", help="Only include these columns."
+    )
+    groups["reformat"] = reformat_group
+
+    # UIParams Section
+    ui_group = parser.add_argument_group("General")
+    ui_group.add_argument(
+        "--continue-on-error", action="store_true", help="Continue processing files if a file cannot be processed."
+    )
+    ui_group.add_argument(
+        "--stop-on-warning", action="store_true", help="Stop processing files if a warning is encountered."
+    )
+    log_levels = ["debug", "info", "warning", "error", "critical"]
+    ui_group.add_argument("--log-level", default="info", choices=log_levels, help="Minimal log level to display.")
+    ui_group.add_argument("--no-color", action="store_true", help="Disable color output.")
+    ui_group.add_argument("--tracebacks", action="store_true", help="Show exception tracebacks.")
+    groups["ui"] = ui_group
+
+    parser.add_argument("--dump-args", action="store_true", help="Print parsed arguments and exit.")
+    parser.add_argument("--dump-config", action="store_true", help="Print parsed configuration (from args) and exit.")
+
+    return parser, groups
 
 
-def _version_callback(value: bool) -> None:
-    if value:
-        print(f'{PROGRAM_NAME}: {__version__}')
-        raise typer.Exit()
+def parse_command_line(args: list[str] | None = None) -> dict[str | None, dict[str, Any]]:
+    """Parse the command line arguments."""
+    parser, groups = get_argument_parser()
+    parsed_args = vars(parser.parse_args(args))
+    grouped_args: dict[str, dict[str, Any]] = {}
+    remaining_args = parsed_args.copy()
+    for key, g in groups.items():
+        # noinspection PyProtectedMember
+        for action in g._group_actions:
+            grouped_args.setdefault(key, {})[action.dest] = parsed_args[action.dest]
+            remaining_args.pop(action.dest)
+    return grouped_args | {None: remaining_args}
 
 
-class _DisplayAction(str, Enum):
-    none = 'none'
-    path = 'path'
-    meta = 'meta'
-
-
-class _FileFormat(str, Enum):
-    original = 'original'
-    csv_flat = 'csv-flat'
-    json_lines_minimal = 'json-lines-minimal'
-    json_lines_header = 'json-lines-header'
-    json_lines_full = 'json-lines-full'
-
-
-# noinspection PyUnusedLocal,PyShadowingBuiltins
-@app.command()
-def flysight2csv(
-    # display options
-    display_type: Annotated[_DisplayAction, Option('--display', '-d', help='what to display')] = _DisplayAction.path,
-    tracebacks: bool = False,
-    # finding files
-    files_or_directories: list[Path] = Argument(),
-    glob_patterns: Optional[list[str]] = Option(
-        None,
-        '--glob',
-        show_default=False,
-        help=f'Glob patterns to match. Defaults to: {" ".join(DEFAULT_GLOB_PATTERNS)}.',
-    ),
-    sort_paths: bool = True,
-    # file parser options
-    offset_datetime: Optional[str] = None,
-    continue_on_error: bool = False,
-    ignore_all_errors: bool = False,
-    error_ignore_patterns: Optional[list[str]] = None,
-    display_path_levels: Annotated[
-        int, Option(help='The number of path names to display in converted files. Set to 0 for the full path.')
-    ] = 3,
-    # file copy options
-    output_directory: Annotated[
-        Optional[Path],
-        Option(
-            '--output-directory', '-o', help='Output directory. If provided, the discovered files will be copied here.'
-        ),
-    ] = None,
-    format: Annotated[_FileFormat, Option('--format', '-f', help='the output file format')] = _FileFormat.original,
-    output_path_levels: Annotated[int, Option(help='The number of path names to join into the new file name.')] = 3,
-    output_path_separator: Annotated[
-        str,
-        Option(
-            '--sep', help='Join directories to file name with this separator. Use / to preserve directory structure'
-        ),
-    ] = '-',
-    csv_dialect: str = FLYSIGHT_CSV_DIALOG,
-    columns: Optional[list[str]] = None,  # TODO: allow patterns/ exclusions
-    sensors: Optional[list[str]] = None,  # TODO: allow patterns/ exclusions
-    # logging
-    log_level: Annotated[str, Option('--log-level', '-L')] = 'info',
-    log_format: str = '%(message)s',
-    log_date_format: str = '%Y-%m-%d %H:%M:%S',
-    # misc
-    version: Annotated[Optional[bool], Option("--version", is_eager=True, callback=_version_callback)] = None,
-) -> None:
-    """Utility for finding and converting FlySight 2 CSV files."""
+def app(args=None):
+    """Main entry point for the cli."""
+    grouped_args: dict[str | None, dict[str, Any]] = parse_command_line(args)
+    other_args = grouped_args.pop(None)
+    if other_args["dump_args"]:
+        print(simplejson.dumps(grouped_args, indent=2, default=str))
+        exit(0)
+    params = ProgramParams.model_validate(grouped_args)
+    if other_args["dump_config"]:
+        print(params.model_dump_json(indent=2))
+        exit(0)
+    console = rich.console.Console(theme=RICH_THEME, color_system=None if params.ui.no_color else "auto")
+    handler = rich.logging.RichHandler(
+        console=console,
+        show_time=False,
+        show_path=params.ui.tracebacks,
+        markup=True,
+        rich_tracebacks=False,
+    )
     logging.basicConfig(
-        level=logging.getLevelName(log_level.upper()),
-        format=log_format,
-        datefmt=log_date_format,
-        handlers=[RichHandler()],
+        level=logging.getLevelName(params.ui.log_level.upper()), format="%(message)s", handlers=[handler]
     )
-    glob_patterns = glob_patterns or DEFAULT_GLOB_PATTERNS.copy()
-    parser_options = ParserOptions(
-        display_path_levels=display_path_levels,
-        ignored_errors=StringSelection(include_patterns=error_ignore_patterns) or None,
-        ignore_all_errors=ignore_all_errors,
-        offset_datetime=offset_datetime and datetime.fromisoformat(offset_datetime) or None,
-        strict=not continue_on_error,
-        metadata_only=not output_directory,
-    )
-    if nonexisting_files_or_directories := [str(p) for p in files_or_directories if not p.exists()]:
-        raise typer.BadParameter(f'Files or directories do not exist: {nonexisting_files_or_directories}')
-    params = _Params(
-        format=format,
-        display_type=display_type,
-        parser_options=parser_options,
-        output_directory=output_directory,
-        output_path_levels=output_path_levels,
-        output_path_separator=output_path_separator,
-        sensors_select=StringSelection(include_values=sensors) if sensors else None,
-        columns_select=StringSelection(include_values=columns) if columns else None,
-    )
-    paths_iterable: Iterable[Path] = iter_matching_files(files_or_directories, glob_patterns=glob_patterns)
-    if sort_paths:
-        paths_iterable = sorted(paths_iterable)
-    for path in paths_iterable:
-        csv_meta = get_metadata(path=path, options=parser_options, ignore_all_errors=ignore_all_errors)
-        if not csv_meta.complete_header:
-            continue
-        try:
-            _process_file(params, source_path=path, csv_meta=csv_meta)
-        except typer.Exit:
-            raise
-        except Exception as e:
-            print(f'[red]    Error processing file: {type(e).__name__}: {e}[/red]')
-            if continue_on_error:
-                if tracebacks:
-                    lines = [f'  {line}' for line in traceback.format_exception(e)]
-                    print(f'[red]{"".join(lines)}[/red]')
-                continue
-            if tracebacks:
-                raise
-            typer.Exit(code=1)
-
-
-@dataclass
-class _Params:
-    format: _FileFormat
-    display_type: _DisplayAction
-    parser_options: ParserOptions
-    output_directory: Path | None
-    output_path_levels: int = 3
-    output_path_separator: str = '-'
-    sensors_select: StringSelection | None = None
-    columns_select: StringSelection | None = None
-    csv_dialect: str = FLYSIGHT_CSV_DIALOG
-
-
-def _display_paths(
-    params: _Params,
-    csv_meta: CSVMeta,
-    *,
-    source_path: Path,
-    target_path: Path | None = None,
-    warning: str | None = None,
-) -> None:
-    source_path = source_path if source_path.is_absolute() else source_path.absolute().relative_to(Path.cwd())
-    target_path = target_path and (
-        target_path if target_path.is_absolute() else target_path.absolute().relative_to(Path.cwd())
-    )
-    display_type = params.display_type
-    if display_type == _DisplayAction.none:
-        return
-    line = f'[blue]{source_path}[/blue]'
-    if target_path:
-        line += f' -> [cyan]{target_path}[/cyan]'
-        if params.format != _FileFormat.original:
-            line += f' ({params.format.value})'
-    if warning:
-        line += f': [yellow]{warning}[/yellow]'
-    print(line)
-    if display_type == _DisplayAction.path:
-        return
-    if display_type == _DisplayAction.meta:
-        _print_meta(csv_meta)
-        return
-    raise NotImplementedError(f'Unknown display action: {display_type}')
-
-
-def _process_file(params: _Params, source_path: Path, csv_meta: CSVMeta) -> None:
-    if not params.output_directory:
-        _display_paths(params, csv_meta=csv_meta, source_path=source_path)
-        return
-
-    if not params.output_directory.is_dir():
-        raise typer.BadParameter(f'Output directory does not exist: {params.output_directory}')
-
-    output_relative_path = params.output_path_separator.join(source_path.parts[-params.output_path_levels :])
-    target_path = params.output_directory / output_relative_path
-    assert target_path.is_relative_to(params.output_directory), target_path
-    _display_paths(
-        params=params,
-        csv_meta=csv_meta,
-        source_path=source_path,
-        target_path=target_path,
-    )
+    program = Program(params, print_callback=console.print)
     try:
-        _convert_file(params, source_path=source_path, target_path=target_path)
-    except NothingToWriteError:
-        logger.warning('No rows selected. Not writing file.')
+        program.run()
+    except FileProcessingError as e:
+        logger.critical(f"Stopping due to {e}")
+        if e.is_format_error:
+            logger.error("To attempt to process the file anyway, use --continue-on-format-error")
+        logger.error("To continue processing other files, use --continue-on-error")
+        exit(2)
+    except WarningEncounteredError as e:
+        logger.warning(str(e))
+        logger.critical("Warning encountered. Stopping due to --stop-on-warning")
+        exit(2)
+    except BadParameterError as e:
+        logger.critical(f"Bad parameter: {e}", exc_info=params.ui.tracebacks)
+        exit(1)
+    except Exception as e:
+        logger.critical(f"Unexpected error: {type(e).__name__}: {e}", exc_info=params.ui.tracebacks)
+        exit(1)
 
 
-def _convert_file(params: _Params, source_path: Path, target_path: Path) -> None:
-    assert source_path.is_file(), source_path
-    if target_path.is_file() and source_path.samefile(target_path):
-        raise ValueError('source and target path are the same')
-
-    if params.format == _FileFormat.original:
-        with open(source_path, 'rb') as fd:
-            with open(target_path, 'wb') as fd2:
-                while True:
-                    data = fd.read(1024 * 1024)
-                    if not data:
-                        break
-                    fd2.write(data)
-        return
-
-    try:
-        parsed = parse_csv(source_path, options=params.parser_options)
-    except UnexpectedFormatError:
-        print('[red]Error parsing CSV file. See log messages above. To continue, use --continue-on-error.[/red]')
-        raise typer.Exit(code=1) from None
-
-    writer = Writer(parsed=parsed, columns=params.columns_select, sensors=params.sensors_select)
-
-    if not target_path.parent.is_dir():
-        target_path.parent.mkdir(parents=True)
-    with open(target_path, 'w', newline='', encoding='utf-8') as fd:
-        if params.format == _FileFormat.csv_flat:
-            writer.write_csv(fd, dialect=params.csv_dialect)
-        elif params.format == _FileFormat.json_lines_minimal:
-            writer.write_json_lines(fd, header=False, fill_nulls=False)
-        elif params.format == _FileFormat.json_lines_header:
-            writer.write_json_lines(fd, header=True, fill_nulls=False)
-        elif params.format == _FileFormat.json_lines_full:
-            writer.write_json_lines(fd, header=False, fill_nulls=True)
-        else:
-            raise NotImplementedError(f'Not-implemented format: {params.format}')
-
-
-def _print_meta(csv_meta: CSVMeta, indent: int = 4) -> None:
-    print(' ' * indent + 'Vars:')
-    for k, v in csv_meta.vars.items():
-        print('  ' * indent + f'{k}: {v}')
-    print(' ' * indent + 'Columns:')
-    for row_type, column_to_unit in csv_meta.units.items():
-        column_to_unit_string = ', '.join(f'{k} ({v or " - "})' for k, v in column_to_unit.items())
-        print('  ' * indent + f'{row_type}: {column_to_unit_string}')
-    print('')
+if __name__ == "__main__":
+    app(
+        [
+            "tests/data/device1",
+            "-o",
+            "_temp/output",
+            "--format",
+            "csv-flat",
+        ]
+    )

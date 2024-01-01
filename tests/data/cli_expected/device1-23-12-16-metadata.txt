@@ -1,0 +1,92 @@
+tests/data/device1/23-12-16/23-21-02/TRACK.CSV
+    Vars:
+        FIRMWARE_VER: v2023.07.01
+        DEVICE_ID: 003b00555752501920313652
+        SESSION_ID: 1c19e8c738d16fd9108c3ea9
+    Sensors/ Columns/ Units:
+        GNSS: time ( - ), lat (deg), lon (deg), hMSL (m), velN (m/s), velE 
+(m/s), velD (m/s), hAcc (m), vAcc (m), sAcc (m/s), numSV ( - )
+    First data row:
+        SENSOR: GNSS
+        time: 2023-12-16T23:21:02.000Z
+        lat: 38.5847912
+        lon: -121.854006
+        hMSL: 28.149
+        velN: 0.78
+        velE: -1.06
+        velD: -1.45
+        hAcc: 228.428
+        vAcc: 279.711
+        sAcc: 13.54
+        numSV: 4
+
+tests/data/device1/23-12-16/23-21-02/SENSOR.CSV
+    Vars:
+        FIRMWARE_VER: v2023.07.01
+        DEVICE_ID: 003b00555752501920313652
+        SESSION_ID: 1c19e8c738d16fd9108c3ea9
+    Sensors/ Columns/ Units:
+        BARO: time (s), pressure (Pa), temperature (deg C)
+        HUM: time (s), humidity (percent), temperature (deg C)
+        MAG: time (s), x (gauss), y (gauss), z (gauss), temperature (deg C)
+        IMU: time (s), wx (deg/s), wy (deg/s), wz (deg/s), ax (g), ay (g), az 
+(g), temperature (deg C)
+        TIME: time (s), tow (s), week ( - )
+        VBAT: time (s), voltage (volt)
+    First data row:
+        SENSOR: IMU
+        time: 560024.829
+        wx: -22.094
+        wy: 39.428
+        wz: -1.586
+        ax: -0.62158
+        ay: -0.48681
+        az: 1.03173
+        temperature: 20.6
+
+tests/data/device1/23-12-16/23-37-27/TRACK.CSV
+    Vars:
+        FIRMWARE_VER: v2023.07.01
+        DEVICE_ID: 003b00555752501920313652
+        SESSION_ID: 41a736c9ef9aaacacf327db0
+    Sensors/ Columns/ Units:
+        GNSS: time ( - ), lat (deg), lon (deg), hMSL (m), velN (m/s), velE 
+(m/s), velD (m/s), hAcc (m), vAcc (m), sAcc (m/s), numSV ( - )
+    First data row:
+        SENSOR: GNSS
+        time: 2023-12-16T23:37:27.400Z
+        lat: 38.5478975
+        lon: -121.8772497
+        hMSL: 1845.233
+        velN: -14.99
+        velE: -62.72
+        velD: -8.94
+        hAcc: 216.738
+        vAcc: 340.445
+        sAcc: 9.15
+        numSV: 4
+
+tests/data/device1/23-12-16/23-37-27/SENSOR.CSV
+    Vars:
+        FIRMWARE_VER: v2023.07.01
+        DEVICE_ID: 003b00555752501920313652
+        SESSION_ID: 41a736c9ef9aaacacf327db0
+    Sensors/ Columns/ Units:
+        BARO: time (s), pressure (Pa), temperature (deg C)
+        HUM: time (s), humidity (percent), temperature (deg C)
+        MAG: time (s), x (gauss), y (gauss), z (gauss), temperature (deg C)
+        IMU: time (s), wx (deg/s), wy (deg/s), wz (deg/s), ax (g), ay (g), az 
+(g), temperature (deg C)
+        TIME: time (s), tow (s), week ( - )
+        VBAT: time (s), voltage (volt)
+    First data row:
+        SENSOR: IMU
+        time: 561282.13
+        wx: 14.099
+        wy: -14.77
+        wz: 14.77
+        ax: 0.21484
+        ay: -0.729
+        az: 0.32275
+        temperature: 31.15
+

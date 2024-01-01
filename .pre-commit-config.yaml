@@ -1,6 +1,7 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
-exclude: "CHANGELOG.md|.all-contributorsrc"
+# exclude test data files: CSV, JSONL, TXT
+exclude: "CHANGELOG.md|.all-contributorsrc|.CSV|.csv|.jsonl|.txt"
 default_stages: [commit]
 
 ci:
@@ -17,15 +18,20 @@ repos:
     rev: v4.5.0
     hooks:
       - id: debug-statements
+      - id: check-added-large-files
       - id: check-builtin-literals
       - id: check-case-conflict
       - id: check-docstring-first
       - id: check-json
+      - id: check-symlinks
       - id: check-toml
       - id: check-xml
       - id: check-yaml
+      - id: debug-statements
+      - id: destroyed-symlinks
       - id: detect-private-key
       - id: end-of-file-fixer
+      - id: mixed-line-ending
       - id: trailing-whitespace
   - repo: https://github.com/python-poetry/poetry
     rev: 1.7.1
@@ -36,6 +42,11 @@ repos:
     hooks:
       - id: prettier
         args: ["--tab-width", "2"]
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.9
     hooks:
@@ -53,4 +64,6 @@ repos:
     rev: v1.8.0
     hooks:
       - id: mypy
-        additional_dependencies: ["types-simplejson"]
+        additional_dependencies:
+          - "types-simplejson>=3.19.0.2"
+          - "pydantic>=2.5.3"

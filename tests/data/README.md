@@ -1,6 +1,8 @@
 # Directory Structure
 
-- `device1/` and `device2/` - a set of CSV files gathered with two different devices during overlapping times
-  - Only a few of the files are complete. Most have been truncated to speed up tests.
-- `invalid/` - altered files that should not be accepted by the validator
-- `formatted/` - used by tests for output format checking
+- `complete/` - complete recordings (not truncated)
+- `device1/` and `device2/` - a set of source files gathered with two different devices during overlapping times
+  - NOTE: truncated to reduce the size of the repository
+- `formatted/` - example source files and their expected reformatted versions
+- `invalid/` - source files that have format errors
+- `edge-cases/` - source files that have edge cases
