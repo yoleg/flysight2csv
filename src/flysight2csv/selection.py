@@ -62,9 +62,13 @@ class StringSelection:
             return False
         return True
 
+    def filter_strings(self, strings: Iterable[str]) -> Iterable[str]:
+        """Returns the strings that match the selection."""
+        return (x for x in strings if self.matches(x))
+
 
 def filter_strings(strings: Iterable[str], selection: Optional[StringSelection] = None) -> Iterable[str]:
     """Filters the columns by the selection."""
     if not selection:
         return strings
-    return (x for x in strings if selection.matches(x))
+    return selection.filter_strings(strings)

@@ -1,6 +1,7 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
-exclude: "CHANGELOG.md|.all-contributorsrc"
+# exclude test data files: CSV, JSONL, TXT
+exclude: "CHANGELOG.md|.all-contributorsrc|.CSV|.csv|.jsonl|.txt"
 default_stages: [commit]
 
 ci:
@@ -63,4 +64,6 @@ repos:
     rev: v1.8.0
     hooks:
       - id: mypy
-        additional_dependencies: ["types-simplejson"]
+        additional_dependencies:
+          - "types-simplejson>=3.19.0.2"
+          - "pydantic>=2.5.3"

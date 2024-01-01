@@ -1,3 +1,3 @@
 # noinspection PyCompatibility
-from . import cli, csv, finder, parser, selection, version, writer
-from .version import __version__
+from flysight2csv import const, parser, reformatter, selection, version
+from flysight2csv.version import __version__

@@ -1,30 +1,29 @@
 import io
-from pathlib import Path
+import os
 
 import pytest
 
-from flysight2csv.parsed_csv import ParsedCSV
-from flysight2csv.parser import ParserOptions, parse_csv
-from flysight2csv.writer import Writer
-from tests.common import DATA_DIR
+from flysight2csv.parsed import ParsedCSV
+from flysight2csv.parser import parse_csv
+from flysight2csv.program_params import FileFormats, ParserOptions, ReformatParams
+from flysight2csv.reformatter import Reformatter
+from tests.common import DATA_DIR, read_raw_text, write_raw_text
 
-DEFAULT_OPTIONS = ParserOptions(display_path_levels=1)
+PARSER_OPTIONS = ParserOptions(
+    display_path_levels=1,
+    metadata_only=False,
+    offset_datetime=None,
+    continue_on_format_error=False,
+    ignore_all_format_errors=False,
+    ignored_format_errors=None,
+)
+DEFAULT_PARAMS = ReformatParams(
+    output_format=FileFormats.csv_flat,
+    csv_dialect="excel",
+    sensors_select=None,
+    columns_select=None,
+)
 WRITE_EXPECTED = False  # Set this to true temporarily to update expected output files.
-
-
-def _get_raw_text(source: Path | io.StringIO) -> str:
-    if isinstance(source, io.StringIO):
-        return source.getvalue()
-    with open(source, newline="", encoding="utf-8") as file:
-        return file.read()
-
-
-def _write_raw_text(source: Path | io.StringIO, text: str) -> None:
-    if isinstance(source, io.StringIO):
-        source.write(text)
-    else:
-        with open(source, "w", newline="", encoding="utf-8") as file:
-            file.write(text)
 
 
 @pytest.mark.parametrize(
@@ -36,7 +35,7 @@ def _write_raw_text(source: Path | io.StringIO, text: str) -> None:
     ],
 )
 @pytest.mark.parametrize("format_type", ["csv-flat", "jsonl-minimal", "jsonl-header", "jsonl-full"])
-def test_write_csv_track(input_filenames, expected_output_filename: str, format_type: str):
+def test_write_csv(input_filenames, expected_output_filename: str, format_type: str):
     paths = [DATA_DIR / "formatted/input/" / x for x in input_filenames]
     expected_output_data_dir = DATA_DIR / "formatted/expected/"
     assert expected_output_data_dir.is_dir()
@@ -45,12 +44,12 @@ def test_write_csv_track(input_filenames, expected_output_filename: str, format_
 
     merged = ParsedCSV()
     for path in paths:
-        parsed = parse_csv(path, options=DEFAULT_OPTIONS)
+        parsed = parse_csv(path, options=PARSER_OPTIONS)
         merged = merged.merge_with(parsed, sort_by_timestamp=False, allow_vars_mismatch=True)
     merged.sort_by_timestamp()
 
     string_io = io.StringIO()
-    writer = Writer(merged)
+    writer = Reformatter(merged, params=DEFAULT_PARAMS)
     if format_type == "csv-flat":
         writer.write_csv(string_io)
     elif format_type == "jsonl-minimal":
@@ -64,9 +63,12 @@ def test_write_csv_track(input_filenames, expected_output_filename: str, format_
 
     if WRITE_EXPECTED:
         expected_output_path.parent.mkdir(parents=True, exist_ok=True)
-        _write_raw_text(expected_output_path, string_io.getvalue())
+        write_raw_text(expected_output_path, string_io.getvalue())
         pytest.fail("Expected output file was updated. Please revert WRITE_EXPECTED to False.")
 
-    expected = _get_raw_text(expected_output_path)
-    actual = _get_raw_text(string_io)
+    expected = read_raw_text(expected_output_path)
+    if extension != "csv":  # CSV files by default write \r\n on any OS. TODO: should this change?
+        expected = expected.replace("\r\n", os.linesep)
+    actual = read_raw_text(string_io)
+    assert actual[:10] == expected[:10]  # pre-check to avoid printing large diffs in most cases
     assert actual == expected

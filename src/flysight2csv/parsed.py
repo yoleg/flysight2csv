@@ -22,6 +22,7 @@ class DataRowMeta:
     file_path: str
     line_number: int
     offset_timestamp: datetime | None = None  # what was added to the time in seconds value to get the timestamp
+    valid_offset: bool = False  # this row's timestamp was calculated using a valid GPS offset
 
     @property
     def location(self) -> str:
@@ -102,6 +103,7 @@ class CSVMeta:
     vars: dict[str, str] = field(default_factory=dict)
     columns: dict[str, list[str]] = field(default_factory=dict)  # row type -> column names
     units: dict[str, dict[str, str]] = field(default_factory=dict)  # row type -> column name -> unit
+    is_flysight2_file: bool = False  # true if the first line indicates this is a FlySight 2 CSV file
     complete_header: bool = False  # true if the FlySight 2 header section is complete (i.e. $DATA row was found)
 
     def iter_column_names(
@@ -162,8 +164,13 @@ class ParsedCSV:
 
     meta: CSVMeta = field(default_factory=CSVMeta)
     rows: list[DataRow] = field(default_factory=list)
-    times_are_invalid: bool = False  # true if $TIME data was unavailable to calculate timestamps for non-GPS data
-    warnings: list[str] = field(default_factory=list)
+    could_not_fix_time: bool = False  # true if $TIME data was unavailable to calculate timestamps for non-GPS data
+    format_errors: list[str] = field(default_factory=list)
+
+    def iter_warnings(self) -> Iterable[str]:
+        """Iterate over potential problems that affect even validly-formatted files."""
+        if self.could_not_fix_time:
+            yield "No $TIME columns available. Could not fix timestamps for non-GPS data."
 
     def __repr__(self) -> str:
         """Simple repr for debugging."""
@@ -191,8 +198,8 @@ class ParsedCSV:
         return ParsedCSV(
             meta=self.meta.merge_with(other.meta, allow_vars_mismatch=allow_vars_mismatch),
             rows=merged_rows,
-            times_are_invalid=self.times_are_invalid or other.times_are_invalid,
-            warnings=self.warnings + other.warnings,
+            could_not_fix_time=self.could_not_fix_time or other.could_not_fix_time,
+            format_errors=self.format_errors + other.format_errors,
         )
 
     def __add__(self, other: ParsedCSV) -> ParsedCSV:

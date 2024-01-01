@@ -3,20 +3,27 @@ from pathlib import Path
 
 import pytest
 
-from flysight2csv import parsed_csv
-from flysight2csv.parsed_csv import DataRow, DataRowMeta, ParsedCSV
-from flysight2csv.parser import ParserOptions, UnexpectedFormatError, parse_csv, parse_csv_returning_parser
+from flysight2csv.parsed import ROW_META_FIELDS, DataRow, DataRowMeta, ParsedCSV
+from flysight2csv.parser import UnexpectedFormatError, parse_csv, parse_csv_returning_parser
+from flysight2csv.program_params import ParserOptions
 from flysight2csv.selection import StringSelection
 from tests.common import DATA_DIR
 
 TRACK_FILES = list(DATA_DIR.glob("device*/**/TRACK.CSV"))
 SENSOR_FILES = list(DATA_DIR.glob("device*/**/SENSOR.CSV"))
-DEFAULT_OPTIONS = ParserOptions(strict=True, display_path_levels=3)
+DEFAULT_OPTIONS = ParserOptions(
+    display_path_levels=3,
+    metadata_only=False,
+    offset_datetime=None,
+    continue_on_format_error=False,
+    ignore_all_format_errors=False,
+    ignored_format_errors=None,
+)
 GPS_START_DATE = datetime.datetime(1980, 1, 6, 0, 0, 0)
 SOME_DATE_BEFORE_FLYSIGHT = datetime.datetime(2000, 1, 1, 0, 0, 0)
 
 
-META_FIELDS = list(parsed_csv.ROW_META_FIELDS)
+META_FIELDS = list(ROW_META_FIELDS)
 
 
 def test_row_meta_fields():
@@ -26,6 +33,7 @@ def test_row_meta_fields():
         "file_path",
         "line_number",
         "offset_timestamp",
+        "valid_offset",
     ], "it should have the expected fields in the expected order"
 
 
@@ -41,8 +49,8 @@ def test_bulk_track_csv(path: Path):
     expected_dict_fields = sorted(expected_columns + META_FIELDS)
     parsed = parse_csv(path=path, options=DEFAULT_OPTIONS)
     assert parsed.meta.columns == {"GNSS": expected_columns}, "columns are not as expected from a TRACK.CSV"
-    assert parsed.warnings == [], "it should have no warnings"
-    assert parsed.times_are_invalid is False, "it should have valid times"
+    assert parsed.format_errors == [], "it should have no warnings"
+    assert parsed.could_not_fix_time is False, "it should have valid times"
     assert parsed.meta.complete_header is True, "it should have complete metadata"
     for i, row in enumerate(parsed.rows):
         meta = row.meta
@@ -56,13 +64,8 @@ def test_bulk_track_csv(path: Path):
 def test_bulk_sensor_csv(path: Path):
     assert path.name == "SENSOR.CSV", "precondition"
     has_gps_time_rows = "$TIME" in path.read_text()
-    options = ParserOptions(
-        strict=False,
-        display_path_levels=3,
-        ignored_errors=StringSelection(
-            include_patterns=[] if has_gps_time_rows else [r"No \$TIME rows available to fix timestamps"]
-        ),
-    )
+    options = DEFAULT_OPTIONS.model_copy()
+
     parsed = parse_csv(path=path, options=options)
     assert parsed.meta.columns == {
         "BARO": ["time", "pressure", "temperature"],
@@ -72,9 +75,9 @@ def test_bulk_sensor_csv(path: Path):
         "TIME": ["time", "tow", "week"],
         "VBAT": ["time", "voltage"],
     }, "columns are not as expected from a TRACK.CSV"
-    assert parsed.times_are_invalid != has_gps_time_rows, "it should not set the flag correctly"
+    assert parsed.could_not_fix_time != has_gps_time_rows, "it should not set the flag correctly"
     assert parsed.meta.complete_header is True, "it should have complete metadata"
-    assert parsed.warnings == [], "it should have no warnings"
+    assert parsed.format_errors == [], "it should have no warnings"
     for i, row in enumerate(parsed.rows):
         meta = row.meta
         next_meta = parsed.rows[i + 1].meta if i + 1 < len(parsed.rows) else None
@@ -91,66 +94,72 @@ def test_bulk_sensor_csv(path: Path):
 
 
 def test_sensor_tow_rollover():
-    path = DATA_DIR / "tow-rollover-SENSOR.CSV"
+    path = DATA_DIR / "edge-cases/tow-rollover-SENSOR.CSV"
     parsed = parse_csv(path=path, options=DEFAULT_OPTIONS)
     assert parsed.rows == [
         DataRow(
             meta=DataRowMeta(
-                file_path="tests/data/tow-rollover-SENSOR.CSV",
+                file_path="data/edge-cases/tow-rollover-SENSOR.CSV",
                 line_number=10,
                 sensor_name="VBAT",
                 timestamp=datetime.datetime(2023, 12, 16, 23, 59, 58, 420000),
                 offset_timestamp=datetime.datetime(2023, 12, 16, 21, 31, 35, 90000),
+                valid_offset=True,
             ),
             values={"time": 8903.33, "voltage": 3.766},
         ),
         DataRow(
             meta=DataRowMeta(
-                file_path="tests/data/tow-rollover-SENSOR.CSV",
+                file_path="data/edge-cases/tow-rollover-SENSOR.CSV",
                 line_number=11,
                 sensor_name="TIME",
                 timestamp=datetime.datetime(2023, 12, 16, 23, 59, 59),
                 offset_timestamp=datetime.datetime(2023, 12, 16, 21, 31, 35, 90000),
+                valid_offset=True,
             ),
             values={"time": 8903.91, "tow": 604799.0, "week": 2292},
         ),
         DataRow(
             meta=DataRowMeta(
-                file_path="tests/data/tow-rollover-SENSOR.CSV",
+                file_path="data/edge-cases/tow-rollover-SENSOR.CSV",
                 line_number=12,
                 sensor_name="VBAT",
                 timestamp=datetime.datetime(2023, 12, 16, 23, 59, 59, 424000),
                 offset_timestamp=datetime.datetime(2023, 12, 16, 21, 31, 35, 90000),
+                valid_offset=True,
             ),
             values={"time": 8904.334, "voltage": 3.768},
         ),
         DataRow(
             meta=DataRowMeta(
-                file_path="tests/data/tow-rollover-SENSOR.CSV",
+                file_path="data/edge-cases/tow-rollover-SENSOR.CSV",
                 line_number=13,
                 sensor_name="TIME",
                 timestamp=datetime.datetime(2023, 12, 17, 0, 0),
                 offset_timestamp=datetime.datetime(2023, 12, 16, 21, 31, 35, 90000),
+                valid_offset=True,
             ),
             values={"time": 8904.91, "tow": 0.0, "week": 2293},
         ),
         DataRow(
             meta=DataRowMeta(
-                file_path="tests/data/tow-rollover-SENSOR.CSV",
+                file_path="data/edge-cases/tow-rollover-SENSOR.CSV",
                 line_number=14,
                 sensor_name="VBAT",
                 timestamp=datetime.datetime(2023, 12, 17, 0, 0, 0, 434000),
                 offset_timestamp=datetime.datetime(2023, 12, 16, 21, 31, 35, 90000),
+                valid_offset=True,
             ),
             values={"time": 8905.344, "voltage": 3.773},
         ),
         DataRow(
             meta=DataRowMeta(
-                file_path="tests/data/tow-rollover-SENSOR.CSV",
+                file_path="data/edge-cases/tow-rollover-SENSOR.CSV",
                 line_number=15,
                 sensor_name="TIME",
                 timestamp=datetime.datetime(2023, 12, 17, 0, 0, 1),
                 offset_timestamp=datetime.datetime(2023, 12, 16, 21, 31, 35, 90000),
+                valid_offset=True,
             ),
             values={"time": 8905.91, "tow": 1.0, "week": 2293},
         ),
@@ -158,16 +167,17 @@ def test_sensor_tow_rollover():
 
 
 def test_track_negative_milliseconds():
-    path = DATA_DIR / "negative-microsecond-TRACK.CSV"
+    path = DATA_DIR / "edge-cases/negative-microsecond-TRACK.CSV"
     parsed = parse_csv(path=path, options=DEFAULT_OPTIONS)
     assert parsed.rows == [
         DataRow(
             meta=DataRowMeta(
-                file_path="tests/data/negative-microsecond-TRACK.CSV",
+                file_path="data/edge-cases/negative-microsecond-TRACK.CSV",
                 line_number=8,
                 sensor_name="GNSS",
                 timestamp=datetime.datetime(2023, 10, 8, 21, 36, 27, 798000),
                 offset_timestamp=None,
+                valid_offset=True,
             ),
             values={
                 "hAcc": 48.581,
@@ -185,11 +195,12 @@ def test_track_negative_milliseconds():
         ),
         DataRow(
             meta=DataRowMeta(
-                file_path="tests/data/negative-microsecond-TRACK.CSV",
+                file_path="data/edge-cases/negative-microsecond-TRACK.CSV",
                 line_number=9,
                 sensor_name="GNSS",
                 timestamp=datetime.datetime(2023, 10, 8, 21, 36, 27, 899000),
                 offset_timestamp=None,
+                valid_offset=True,
             ),
             values={
                 "hAcc": 45.9,
@@ -207,11 +218,12 @@ def test_track_negative_milliseconds():
         ),
         DataRow(
             meta=DataRowMeta(
-                file_path="tests/data/negative-microsecond-TRACK.CSV",
+                file_path="data/edge-cases/negative-microsecond-TRACK.CSV",
                 line_number=10,
                 sensor_name="GNSS",
                 timestamp=datetime.datetime(2023, 10, 8, 21, 36, 27, 999000),
                 offset_timestamp=None,
+                valid_offset=True,
             ),
             values={
                 "hAcc": 43.761,
@@ -229,11 +241,12 @@ def test_track_negative_milliseconds():
         ),
         DataRow(
             meta=DataRowMeta(
-                file_path="tests/data/negative-microsecond-TRACK.CSV",
+                file_path="data/edge-cases/negative-microsecond-TRACK.CSV",
                 line_number=11,
                 sensor_name="GNSS",
                 timestamp=datetime.datetime(2023, 10, 8, 21, 36, 28, 101000),
                 offset_timestamp=None,
+                valid_offset=True,
             ),
             values={
                 "hAcc": 41.968,
@@ -251,11 +264,12 @@ def test_track_negative_milliseconds():
         ),
         DataRow(
             meta=DataRowMeta(
-                file_path="tests/data/negative-microsecond-TRACK.CSV",
+                file_path="data/edge-cases/negative-microsecond-TRACK.CSV",
                 line_number=12,
                 sensor_name="GNSS",
                 timestamp=datetime.datetime(2023, 10, 8, 21, 36, 28, 182000),
                 offset_timestamp=None,
+                valid_offset=True,
             ),
             values={
                 "hAcc": 70.196,
@@ -275,7 +289,8 @@ def test_track_negative_milliseconds():
 
 
 def test_merge():
-    options = ParserOptions(strict=True, display_path_levels=2)
+    options = DEFAULT_OPTIONS.model_copy()
+    options.display_path_levels = 2
     expected_metadata = {
         "DEVICE_ID": "0033002f4b34500b20393636",
         "FIRMWARE_VER": "v2023.07.01",
@@ -289,8 +304,8 @@ def test_merge():
     assert parsed1.meta.vars == expected_metadata, "precondition: metadata should be the same and as expected"
     assert parsed2.meta.vars == expected_metadata, "precondition: metadata should be the same and as expected"
     assert parsed1.meta.complete_header == parsed2.meta.complete_header is True, "precondition: metadata is complete"
-    assert parsed1.times_are_invalid == parsed2.times_are_invalid is False, "precondition: times are valid"
-    assert parsed1.warnings == parsed2.warnings == [], "precondition: no warnings"
+    assert parsed1.could_not_fix_time == parsed2.could_not_fix_time is False, "precondition: times are valid"
+    assert parsed1.format_errors == parsed2.format_errors == [], "precondition: no warnings"
 
     merged: ParsedCSV = parsed1.merge_with(parsed2, sort_by_timestamp=True, allow_vars_mismatch=False)
     assert len(parsed1.rows) + len(parsed2.rows) == len(merged.rows), "it should have the same number of rows"
@@ -346,41 +361,43 @@ def test_merge():
     ), f"it should repr correctly: {merged!r}"
 
     assert merged.meta.complete_header is True, "it should have complete metadata"
-    assert merged.times_are_invalid is False, "it should have valid times"
-    assert merged.warnings == [], "it should have no warnings"
+    assert merged.could_not_fix_time is False, "it should have valid times"
+    assert merged.format_errors == [], "it should have no warnings"
 
 
 def test_incomplete_meta():
-    path = DATA_DIR / "invalid/SENSOR-incomplete-meta.csv"
-    options = ParserOptions(strict=False, display_path_levels=1, ignore_all_errors=True)
+    path = DATA_DIR / "invalid/incomplete-meta-SENSOR.csv"
+    options = DEFAULT_OPTIONS.model_copy()
+    options.ignore_all_format_errors = True
+    options.display_path_levels = 1
     parser = parse_csv_returning_parser(path, options)
     assert parser.state.ignored_messages == [
-        "Unexpected '$IMU' before $DATA",
-        "Unexpected '$BARO' before $DATA",
-        "Unexpected '$MAG' before $DATA",
-        "Unexpected '$HUM' before $DATA",
+        "Unexpected '$IMU' before '$DATA'",
+        "Unexpected '$BARO' before '$DATA'",
+        "Unexpected '$MAG' before '$DATA'",
+        "Unexpected '$HUM' before '$DATA'",
         "Incomplete metadata.",
         "No data rows found.",
     ], "it should have the expected ignored warnings"
 
 
 def test_incomplete_row():
-    path = DATA_DIR / "invalid/SENSOR-incomplete-row.csv"
-    options = ParserOptions(strict=False, display_path_levels=1, ignore_all_errors=True)
+    path = DATA_DIR / "invalid/incomplete-row-SENSOR.csv"
+    options = DEFAULT_OPTIONS.model_copy()
+    options.ignore_all_format_errors = True
+    options.display_path_levels = 1
     parser = parse_csv_returning_parser(path, options)
-    assert parser.state.ignored_messages == [
-        "Missing columns: ['temperature'])",
-        "No $TIME rows available to fix timestamps.",
-    ]
+    assert parser.state.ignored_messages == ["Missing values for ['ax', 'ay', 'az', 'temperature', 'wy', 'wz'])"]
 
 
 def test_not_a_csv():
     path = DATA_DIR / "invalid/not_a_csv.txt"
-    options = ParserOptions(strict=False, display_path_levels=1, ignore_all_errors=True)
+    options = DEFAULT_OPTIONS.model_copy()
+    options.ignore_all_format_errors = True
+    options.display_path_levels = 1
     parser = parse_csv_returning_parser(path, options)
     assert parser.state.ignored_messages == [
-        "First line does not match '$FLYS,1'",
-        r"First field does not match '^\$[A-Z]+$'",
+        "First line is not '$FLYS,1'",
         "No $VAR metadata found.",
         "No columns found.",
         "No units found.",
@@ -392,6 +409,6 @@ def test_not_a_csv():
 @pytest.mark.ignore_warnings(StringSelection(include_patterns=[r".*"]))
 def test_strict_mode_raises_error():
     path = DATA_DIR / "invalid/not_a_csv.txt"
-    options = ParserOptions(strict=True)
+    options = DEFAULT_OPTIONS
     with pytest.raises(UnexpectedFormatError):
         parse_csv_returning_parser(path, options)

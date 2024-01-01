@@ -1,0 +1,86 @@
+Usage: flysight2csv [-h] [--version] [--glob PATTERN [PATTERN ...]]
+                    [-i {none,path,metadata}] [--display-path-levels INT]
+                    [--metadata-only] [--offset-datetime DATETIME]
+                    [--continue-on-format-error] [--ignore-all-format-errors]
+                    [--ignored-format-errors MESSAGE [MESSAGE ...]]
+                    [--output-directory PATH] [--output-path-levels INT]
+                    [--output-path-separator OUTPUT_PATH_SEPARATOR]
+                    [--no-merge] [--only-merge] [--merged-name NAME]
+                    [--format {unchanged,csv-flat,json-lines-minimal,json-lines-header,json-lines-full}]
+                    [--csv-dialect {excel,excel-tab,unix,flysight2csv}]
+                    [--sensors SENSOR [SENSOR ...]]
+                    [--columns COLUMN [COLUMN ...]] [--continue-on-error]
+                    [--stop-on-warning]
+                    [--log-level {debug,info,warning,error,critical}]
+                    [--no-color] [--tracebacks] [--dump-args] [--dump-config]
+                    FILE_OR_DIR [FILE_OR_DIR ...]
+
+Utility for working with FlySight 2 CSV files.
+
+Options:
+  -h, --help            show this help message and exit
+  --version             display the version and exit.
+  --dump-args           Print parsed arguments and exit. (default: False)
+  --dump-config         Print parsed configuration (from args) and exit.
+                        (default: False)
+
+File Discovery:
+  FILE_OR_DIR           Files or directories to process.
+  --glob, --glob-patterns PATTERN [PATTERN ...]
+                        Glob patterns to match. (default: ['**/*TRACK.CSV',
+                        '**/*SENSOR.CSV'])
+  -i, --info, --info-type {none,path,metadata}
+                        The type of information to display about each
+                        discovered file. (default: path)
+
+Parser Options:
+  --display-path-levels INT
+                        The number of path levels to display. (default: 3)
+  --metadata-only       Display metadata only. (default: False)
+  --offset-datetime DATETIME
+                        Force this offset datetime instead of auto-detecting
+                        from $TIME columns. (default: None)
+  --continue-on-format-error
+                        Continue attempting to parse the file even if there
+                        are format errors. (default: False)
+  --ignore-all-format-errors
+                        Ignore all format errors. (default: False)
+  --ignored-format-errors MESSAGE [MESSAGE ...]
+                        Ignore these format error messages. (default: None)
+
+Output Path:
+  --output-directory, -o PATH
+                        Directory to copy files to. Required for the --format
+                        option. (default: None)
+  --output-path-levels INT
+                        The number of path names to join into the new file
+                        name. (default: 3)
+  --output-path-separator OUTPUT_PATH_SEPARATOR
+                        Join directories to file name with this separator. Use
+                        / to preserve directory structure. (default: -)
+  --no-merge            Do not also merge files from a single directory.
+                        Conflicts with --only-merge. (default: True)
+  --only-merge          Do not write non-merged files. Conflicts with
+                        --no-merge. (default: False)
+  --merged-name NAME    The name of the merged file. NOTE: also affected by
+                        --output-path-levels. (default: MERGED.CSV)
+
+Reformatting:
+  --format, -f {unchanged,csv-flat,json-lines-minimal,json-lines-header,json-lines-full}
+                        The output file format. (default: unchanged)
+  --csv-dialect {excel,excel-tab,unix,flysight2csv}
+                        CSV dialect. (default: flysight2csv)
+  --sensors SENSOR [SENSOR ...]
+                        Filter data to just these sensors. (default: None)
+  --columns COLUMN [COLUMN ...]
+                        Only include these columns. (default: None)
+
+General:
+  --continue-on-error   Continue processing files if a file cannot be
+                        processed. (default: False)
+  --stop-on-warning     Stop processing files if a warning is encountered.
+                        (default: False)
+  --log-level {debug,info,warning,error,critical}
+                        Minimal log level to display. (default: info)
+  --no-color            Disable color output. (default: False)
+  --tracebacks          Show exception tracebacks. (default: False)
