@@ -56,10 +56,12 @@ DEFAULTS = ProgramParams(
 
 
 def test_common_reformat(tmpdir: py.path.local, monkeypatch):
+    source_dir = DATA_DIR / "formatted/input/"
+    expected_data_dir = DATA_DIR / "formatted/expected/csv-flat"
     output_dir = Path(tmpdir.mkdir("output"))
     string_io = io.StringIO()
     params = DEFAULTS.model_copy(deep=True)
-    params.finder.files_or_directories = [DATA_DIR / "formatted/input/"]
+    params.finder.files_or_directories = [source_dir]
     params.output.output_directory = output_dir
     params.output.output_path_levels = 1
     params.parser.display_path_levels = 1
@@ -69,7 +71,7 @@ def test_common_reformat(tmpdir: py.path.local, monkeypatch):
     for path in output_dir.glob("**/*.*"):
         assert path.is_file()
         suffix = path.name.rsplit("-", 1)[-1]
-        expected: Path = DATA_DIR / "formatted/expected/csv-flat" / suffix.lower()
+        expected: Path = expected_data_dir / suffix.lower()
         actual_lines = read_raw_text(path).splitlines(keepends=True)
         expected_lines = read_raw_text(expected).splitlines(keepends=True)
         assert actual_lines[:10] == expected_lines[:10]
