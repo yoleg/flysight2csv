@@ -1,4 +1,5 @@
 import io
+import os
 from pathlib import Path
 
 import py
@@ -75,8 +76,11 @@ def test_common_reformat(tmpdir: py.path.local, monkeypatch):
     console_output = string_io.getvalue()
     console_output = console_output.replace(str(output_dir), "<output_dir>")
     console_output = console_output.replace(str(DATA_DIR), "<data_dir>")
+    if os.path.sep != "/":
+        # allow tests to run on Windows without a separate expected result file
+        console_output = console_output.replace(os.path.sep, "/")
     assert console_output.splitlines() == [
-        "[blue]<data_dir>\\formatted\\input\\TRACK.CSV[/blue] -> " "[cyan]<output_dir>\\TRACK.CSV[/cyan] (csv-flat)",
-        "[blue]<data_dir>\\formatted\\input\\SENSOR.CSV[/blue] -> " "[cyan]<output_dir>\\SENSOR.CSV[/cyan] (csv-flat)",
-        "[blue]<data_dir>\\formatted\\input\\*[/blue] -> " "[cyan]<output_dir>\\MERGED.CSV[/cyan] (csv-flat)",
+        "[blue]<data_dir>/formatted/input/TRACK.CSV[/blue] -> " "[cyan]<output_dir>/TRACK.CSV[/cyan] (csv-flat)",
+        "[blue]<data_dir>/formatted/input/SENSOR.CSV[/blue] -> " "[cyan]<output_dir>/SENSOR.CSV[/cyan] (csv-flat)",
+        "[blue]<data_dir>/formatted/input/*[/blue] -> " "[cyan]<output_dir>/MERGED.CSV[/cyan] (csv-flat)",
     ]
