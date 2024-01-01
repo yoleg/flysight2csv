@@ -72,6 +72,42 @@ def test_display_metadata():
     "args, expected",
     [
         pytest.param(
+            ["fake/path"],
+            ProgramParams(
+                ui=UIParams(
+                    continue_on_error=False, log_level="info", no_color=False, stop_on_warning=False, tracebacks=False
+                ),
+                finder=FinderParams(
+                    files_or_directories=[Path("fake/path")],
+                    glob_patterns=["**/*TRACK.CSV", "**/*SENSOR.CSV"],
+                    info_type=InfoTypes.path,
+                ),
+                output=OutputPathParams(
+                    output_directory=None,
+                    output_path_levels=3,
+                    output_path_separator="-",
+                    merge=True,
+                    only_merge=False,
+                    merged_name="MERGED.CSV",
+                ),
+                parser=ParserOptions(
+                    display_path_levels=3,
+                    metadata_only=False,
+                    offset_datetime=None,
+                    continue_on_format_error=False,
+                    ignore_all_format_errors=False,
+                    ignored_format_errors=None,
+                ),
+                reformat=ReformatParams(
+                    output_format=FileFormats.unchanged,
+                    csv_dialect="flysight2csv",
+                    sensors_select=None,
+                    columns_select=None,
+                ),
+            ),
+            id="minimal_params",
+        ),
+        pytest.param(
             [
                 "--info",
                 "metadata",

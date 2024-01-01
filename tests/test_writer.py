@@ -31,7 +31,7 @@ WRITE_EXPECTED = False  # Set this to true temporarily to update expected output
     [
         pytest.param(["SENSOR.CSV"], "sensor", id="sensor"),
         pytest.param(["TRACK.CSV"], "track", id="track"),
-        pytest.param(["SENSOR.CSV", "TRACK.CSV"], "merged", id="merged"),
+        pytest.param(["TRACK.CSV", "SENSOR.CSV"], "merged", id="merged"),
     ],
 )
 @pytest.mark.parametrize("format_type", ["csv-flat", "jsonl-minimal", "jsonl-header", "jsonl-full"])
@@ -69,6 +69,7 @@ def test_write_csv(input_filenames, expected_output_filename: str, format_type: 
     expected = read_raw_text(expected_output_path)
     if extension != "csv":  # CSV files by default write \r\n on any OS. TODO: should this change?
         expected = expected.replace("\r\n", os.linesep)
-    actual = read_raw_text(string_io)
-    assert actual[:10] == expected[:10]  # pre-check to avoid printing large diffs in most cases
-    assert actual == expected
+    expected_lines = expected.splitlines(keepends=True)
+    actual_lines = read_raw_text(string_io).splitlines(keepends=True)
+    assert actual_lines[:10] == expected_lines[:10]  # pre-check to avoid printing large diffs in most cases
+    assert actual_lines == expected_lines

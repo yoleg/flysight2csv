@@ -13,7 +13,9 @@ from flysight2csv.selection import StringSelection
 class BaseParams(BaseModel):
     """A base class for parameter dataclasses."""
 
-    pass
+    class Config:
+        """Pydantic configuration."""
+        validate_assignment = True
 
 
 class ProgramParams(BaseParams):

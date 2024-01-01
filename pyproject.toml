@@ -87,7 +87,7 @@ minor_tags = ["feat"]
 patch_tags = ["fix", "perf"]
 
 [tool.pytest.ini_options]
-addopts = "-v"
+addopts = "-v --tb=short"
 filterwarnings = ["error", "default::DeprecationWarning:.*"]
 log_format = '%(asctime)s %(levelname)s %(message)s'
 log_date_format = '%Y-%m-%d %H:%M:%S'
