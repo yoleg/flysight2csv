@@ -32,11 +32,9 @@
 
 ---
 
-**Documentation
-**: <a href="https://flysight2csv.readthedocs.io" target="_blank">https://flysight2csv.readthedocs.io </a>
+**Documentation**: <a href="https://flysight2csv.readthedocs.io" target="_blank">https://flysight2csv.readthedocs.io </a>
 
-**Source Code
-**: <a href="https://github.com/yoleg/flysight2csv" target="_blank">https://github.com/yoleg/flysight2csv </a>
+**Source Code**: <a href="https://github.com/yoleg/flysight2csv" target="_blank">https://github.com/yoleg/flysight2csv </a>
 
 ---
 
@@ -67,7 +65,7 @@ Compatibility:
 - Tested on Windows, Mac, and Linux
 - May be used as a Python library or command-line tool
 
-## Possible future features
+### Possible future features
 
 Let me know if you would like to see any of these added.
 
