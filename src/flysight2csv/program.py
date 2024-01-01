@@ -269,7 +269,7 @@ def _iter_matching_files(files_or_directories: Iterable[Path], glob_patterns: Se
                 yield path
             continue
         for glob_pattern in glob_patterns:
-            for child_path in path.glob(glob_pattern):
+            for child_path in sorted(path.glob(glob_pattern)):
                 if child_path.is_file():
                     yield child_path
 
