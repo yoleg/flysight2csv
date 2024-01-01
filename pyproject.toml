@@ -88,11 +88,11 @@ patch_tags = ["fix", "perf"]
 [tool.pytest.ini_options]
 addopts = "-v"
 filterwarnings = ["error", "default::DeprecationWarning:.*"]
-log_format = '%(asctime)s %(levelname)s %(message)s'
-log_date_format = '%Y-%m-%d %H:%M:%S'
+log_format = "%(asctime)s %(levelname)s %(message)s"
+log_date_format = "%Y-%m-%d %H:%M:%S"
 pythonpath = ["src"]
 log_cli= true
-log_level = 'INFO'
+log_level = "INFO"
 testpaths = ["tests"]
 markers = [
     "slow",
@@ -164,14 +164,13 @@ known_first_party = ["flysight2csv", "tests"]
 
 [tool.black]
 line-length = 120
-skip-string-normalization = true
-target-version = ['py310']
+target-version = ["py310"]
 
 [tool.mypy]
 mypy_path = "src/"
 exclude = [
-    'docs/.*',
-    'setup.py',
+    "docs/.*",
+    "setup.py",
 ]
 check_untyped_defs = true
 disallow_any_generics = true

@@ -26,7 +26,7 @@ class DataRowMeta:
     @property
     def location(self) -> str:
         """The human-readable location of this row, e.g. '23-10-08/15-26-01/TRACK.CSV:123'."""
-        return f'{self.file_path}:{self.line_number}'
+        return f"{self.file_path}:{self.line_number}"
 
     @property
     def safe_timestamp_sort_key(self) -> tuple[datetime, int]:
@@ -36,7 +36,7 @@ class DataRowMeta:
     def to_dict(
         self,
         selection: StringSelection | None = None,
-        prefix: str = '',
+        prefix: str = "",
         factory: DictFactory = dict,
         converter: Callable[[Any], Any] | None = None,
     ) -> MutableMapping[str, Any]:
@@ -46,7 +46,7 @@ class DataRowMeta:
             value = getattr(self, string)
             if converter is not None:
                 value = converter(value)
-            result[f'{prefix}{string}'] = value
+            result[f"{prefix}{string}"] = value
         return result
 
 
@@ -64,8 +64,8 @@ class DataRow:
         self,
         selection: StringSelection | None = None,  # applies before prefixes
         metadata_only: bool = False,
-        meta_prefix: str = '',
-        values_prefix: str = '',
+        meta_prefix: str = "",
+        values_prefix: str = "",
         factory: DictFactory = dict,
         converter: Callable[[Any], Any] | None = None,
     ) -> MutableMapping[str, Any]:
@@ -74,9 +74,9 @@ class DataRow:
         if metadata_only:
             return result
         for column_name in filter_strings(self.values, selection=selection):
-            key = f'{values_prefix}{column_name}'
+            key = f"{values_prefix}{column_name}"
             if result.get(key):
-                raise ValueError(f'Value key {key} overlaps with a metadata key! Please set a different prefix.')
+                raise ValueError(f"Value key {key} overlaps with a metadata key! Please set a different prefix.")
             value = self.values[column_name]
             if converter is not None:
                 value = converter(value)
@@ -131,17 +131,17 @@ class CSVMeta:
         """Simple repr for debugging."""
         parameter_strings = []
         for key, value in vars(self).items():
-            value = f'({len(value)})' if key == 'paths' and value else repr(value)
-            parameter_strings.append(f'{key}={value}')
-        parameters = ', '.join(parameter_strings)
-        return f'{self.__class__.__name__}({parameters})'
+            value = f"({len(value)})" if key == "paths" and value else repr(value)
+            parameter_strings.append(f"{key}={value}")
+        parameters = ", ".join(parameter_strings)
+        return f"{self.__class__.__name__}({parameters})"
 
     def merge_with(self, other: CSVMeta, allow_vars_mismatch: bool = False) -> CSVMeta:
         """Return a new CSVMeta that combines this one with another."""
         if not isinstance(other, CSVMeta):
-            raise TypeError(f'Cannot merge with {type(other).__name__}.')
+            raise TypeError(f"Cannot merge with {type(other).__name__}.")
         if not allow_vars_mismatch and self.vars and self.vars != other.vars:
-            raise ValueError(f'VAR metadata mismatch! {self.vars} != {other.vars}')
+            raise ValueError(f"VAR metadata mismatch! {self.vars} != {other.vars}")
         return CSVMeta(
             paths=self.paths + other.paths,
             display_paths=self.display_paths + other.display_paths,
@@ -169,10 +169,10 @@ class ParsedCSV:
         """Simple repr for debugging."""
         parameter_strings = []
         for key, value in vars(self).items():
-            value = f'({len(value)})' if key == 'rows' and value else repr(value)
-            parameter_strings.append(f'{key}={value}')
-        parameters = ', '.join(parameter_strings)
-        return f'{self.__class__.__name__}({parameters})'
+            value = f"({len(value)})" if key == "rows" and value else repr(value)
+            parameter_strings.append(f"{key}={value}")
+        parameters = ", ".join(parameter_strings)
+        return f"{self.__class__.__name__}({parameters})"
 
     def iter_rows(self, sensors: StringSelection | None = None) -> Iterable[DataRow]:
         """Iterate over data rows for the given types."""
@@ -183,7 +183,7 @@ class ParsedCSV:
     ) -> ParsedCSV:
         """Return a new ParsedCSV that combines this one with another."""
         if not isinstance(other, ParsedCSV):
-            raise TypeError(f'Cannot merge with {type(other).__name__}.')
+            raise TypeError(f"Cannot merge with {type(other).__name__}.")
         if sort_by_timestamp:
             merged_rows = sorted(itertools.chain(self.rows, other.rows), key=lambda x: x.meta.safe_timestamp_sort_key)
         else:

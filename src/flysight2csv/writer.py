@@ -35,7 +35,7 @@ class Writer:
         sensors: Optional[StringSelection] = None,  # sensor selection
     ):
         if not parsed.rows:
-            raise ValueError(f'Parsed file has no rows! {parsed.meta.paths}')
+            raise ValueError(f"Parsed file has no rows! {parsed.meta.paths}")
 
         self.parsed = parsed
         self.sensor_selection = sensors
@@ -43,7 +43,7 @@ class Writer:
         # derived values (cached)
         self._selected_columns: list[str] = _select_columns(parsed, columns=columns, sensors=sensors)
         if not self._selected_columns:
-            raise ValueError('No columns selected!')
+            raise ValueError("No columns selected!")
         self._column_selection = StringSelection(include_values=self._selected_columns)
 
     def write_csv(self, target: TextIO | Path, dialect: str = FLYSIGHT_CSV_DIALOG) -> None:
@@ -58,7 +58,7 @@ class Writer:
         :param dialect: The CSV dialect to use. Must be registered with csv.register_dialect (see Python csv library).
         """
         if isinstance(target, Path):
-            with open(target, 'w', encoding='utf-8', newline='') as fd:
+            with open(target, "w", encoding="utf-8", newline="") as fd:
                 return self.write_csv(fd, dialect=dialect)
         writer = csv.writer(target, dialect=dialect)
         header_written = False
@@ -68,19 +68,19 @@ class Writer:
                 header_written = True
             writer.writerow(row.get_value(column_name, default=None) for column_name in self._selected_columns)
         if not header_written:
-            raise NothingToWriteError('No rows selected!')
+            raise NothingToWriteError("No rows selected!")
 
     def write_json_lines(
         self, target: TextIO | Path, header: bool, fill_nulls: bool, default_value: Any | None = None
     ) -> None:
         """Write a file of JSON lines for each row."""
         if isinstance(target, Path):
-            with open(target, 'w', encoding='utf-8', newline='') as fd:
+            with open(target, "w", encoding="utf-8", newline="") as fd:
                 return self.write_json_lines(fd, fill_nulls=fill_nulls, header=header, default_value=default_value)
         if header:
-            target.write(json.dumps({k: None for k in self._selected_columns}) + '\n')
+            target.write(json.dumps({k: None for k in self._selected_columns}) + "\n")
         for row in self.iter_dicts(add_missing=fill_nulls, default_value=default_value, converter=_converter_for_json):
-            target.write(json.dumps(row) + '\n')
+            target.write(json.dumps(row) + "\n")
 
     def iter_dicts(
         self, add_missing: bool = False, default_value: Any | None = None, converter: Callable[[Any], Any] | None = None
@@ -103,11 +103,11 @@ def _converter_for_json(value: Any) -> Any:
 def _select_columns(
     parsed: ParsedCSV, columns: Optional[StringSelection] = None, sensors: Optional[StringSelection] = None
 ) -> list[str]:
-    assert parsed.meta.columns, 'No column names in file!'
+    assert parsed.meta.columns, "No column names in file!"
     iter_data_columns = parsed.meta.iter_column_names(selection=columns, sensors=sensors)
     iter_meta_columns = filter_strings(ROW_META_FIELDS, selection=columns)
     selected_columns = list(chain(iter_meta_columns, iter_data_columns))
     if len(selected_columns) != len(set(selected_columns)):
         duplicates = sorted(x for x in selected_columns if selected_columns.count(x) > 1)
-        raise Exception(f'Duplicate column names found: {duplicates}')
+        raise Exception(f"Duplicate column names found: {duplicates}")
     return selected_columns
