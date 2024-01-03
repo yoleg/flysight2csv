@@ -130,3 +130,12 @@ class FileFormats(str, PythonReprEnum):
     json_lines_minimal = "json-lines-minimal"
     json_lines_header = "json-lines-header"
     json_lines_full = "json-lines-full"
+
+
+EXTENSIONS = {
+    FileFormats.unchanged: None,
+    FileFormats.csv_flat: '.csv',
+    FileFormats.json_lines_minimal: '.jsonl',
+    FileFormats.json_lines_header: '.jsonl',
+    FileFormats.json_lines_full: '.jsonl',
+}

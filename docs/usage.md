@@ -6,6 +6,8 @@ Assuming that you've followed the {ref}`installations steps <installation>`, you
 
 **Please note that this is an early release, and the API may change in future versions.**
 
+## Examples
+
 Preview the files to be processed:
 
 ```shell
@@ -31,11 +33,22 @@ For more options, see the help:
 flysight2csv --help
 ```
 
-## Supported Formats
+## Supported Output Formats
 
-```{include} ../tests/data/cli_expected/formats.txt
+When the `-o` (`--output-directory`) directory is specified, the files will be copied to that directory. The files will
+be renamed to include the date and time of the flight, and the file extension will be changed to `.csv`.
 
-```
+The possible output formats (`--format` option) are:
+
+- `unchanged` (default)
+  - NOTE: this disables merging, filtering, etc... and just copies the files
+- `csv-flat`
+- `json-lines-minimal`
+- `json-lines-header`
+- `json-lines-full`
+
+Examples of each format are available in
+the [formatted test data](https://github.com/yoleg/flysight2csv/tree/main/tests/data/formatted/expected) folder.
 
 ## Command-line Parameters
 

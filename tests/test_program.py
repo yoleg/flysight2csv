@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import py
+import pytest
 
 from flysight2csv.program import Program
 from flysight2csv.program_params import (
@@ -36,7 +37,7 @@ DEFAULTS = ProgramParams(
         output_path_separator="-",
         merge=True,
         only_merge=False,
-        merged_name="MERGED.CSV",
+        merged_name="MERGED",
     ),
     parser=ParserOptions(
         display_path_levels=3,
@@ -55,9 +56,10 @@ DEFAULTS = ProgramParams(
 )
 
 
-def test_common_reformat(tmpdir: py.path.local, monkeypatch):
+@pytest.mark.parametrize("format_type", [FileFormats.csv_flat, FileFormats.json_lines_minimal])
+def test_common_reformat(tmpdir: py.path.local, monkeypatch, format_type: FileFormats):
     source_dir = DATA_DIR / "formatted/input/"
-    expected_data_dir = DATA_DIR / "formatted/expected/csv-flat"
+    expected_data_dir = DATA_DIR / f"formatted/expected/{format_type.value}/"
     output_dir = Path(tmpdir.mkdir("output"))
     string_io = io.StringIO()
     params = DEFAULTS.model_copy(deep=True)
@@ -65,7 +67,7 @@ def test_common_reformat(tmpdir: py.path.local, monkeypatch):
     params.output.output_directory = output_dir
     params.output.output_path_levels = 1
     params.parser.display_path_levels = 1
-    params.reformat.output_format = FileFormats.csv_flat
+    params.reformat.output_format = format_type
     program = Program(params=params, print_callback=lambda x: string_io.write(x + "\n") and None or None)
     program.run()
     for path in output_dir.glob("**/*.*"):
@@ -81,8 +83,18 @@ def test_common_reformat(tmpdir: py.path.local, monkeypatch):
     if os.path.sep != "/":
         # allow tests to run on Windows without a separate expected result file
         console_output = console_output.replace(os.path.sep, "/")
-    assert console_output.splitlines() == [
-        "[blue]<data_dir>/formatted/input/TRACK.CSV[/blue] -> " "[cyan]<output_dir>/TRACK.CSV[/cyan] (csv-flat)",
-        "[blue]<data_dir>/formatted/input/SENSOR.CSV[/blue] -> " "[cyan]<output_dir>/SENSOR.CSV[/cyan] (csv-flat)",
-        "[blue]<data_dir>/formatted/input/*[/blue] -> " "[cyan]<output_dir>/MERGED.CSV[/cyan] (csv-flat)",
-    ]
+    if format_type == FileFormats.csv_flat:
+        assert console_output.splitlines() == [
+            "[blue]<data_dir>/formatted/input/TRACK.CSV[/blue] -> " "[cyan]<output_dir>/TRACK.csv[/cyan] (csv-flat)",
+            "[blue]<data_dir>/formatted/input/SENSOR.CSV[/blue] -> " "[cyan]<output_dir>/SENSOR.csv[/cyan] (csv-flat)",
+            "[blue]<data_dir>/formatted/input/*[/blue] -> " "[cyan]<output_dir>/MERGED.csv[/cyan] (csv-flat)",
+        ]
+    else:
+        assert console_output.splitlines() == [
+            "[blue]<data_dir>/formatted/input/TRACK.CSV[/blue] -> "
+            "[cyan]<output_dir>/TRACK.jsonl[/cyan] (json-lines-minimal)",
+            "[blue]<data_dir>/formatted/input/SENSOR.CSV[/blue] -> "
+            "[cyan]<output_dir>/SENSOR.jsonl[/cyan] (json-lines-minimal)",
+            "[blue]<data_dir>/formatted/input/*[/blue] -> "
+            "[cyan]<output_dir>/MERGED.jsonl[/cyan] (json-lines-minimal)",
+        ]

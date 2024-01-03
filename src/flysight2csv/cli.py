@@ -149,7 +149,7 @@ def get_argument_parser() -> Tuple[argparse.ArgumentParser, dict[str, ArgumentGr
         "--merged-name",
         metavar="NAME",
         help="The name of the merged file. NOTE: also affected by --output-path-levels.",
-        default="MERGED.CSV",
+        default="MERGED",
     )
     groups["output"] = output_path_group
 

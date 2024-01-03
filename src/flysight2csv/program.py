@@ -9,7 +9,15 @@ from typing import Callable, Iterable, Iterator, Sequence
 
 from flysight2csv.parsed import CSVMeta, ParsedCSV
 from flysight2csv.parser import Parser, UnexpectedFormatError, get_parsed_for_metadata, parse_csv
-from flysight2csv.program_params import FileFormats, FinderParams, InfoTypes, OutputPathParams, ProgramParams, UIParams
+from flysight2csv.program_params import (
+    EXTENSIONS,
+    FileFormats,
+    FinderParams,
+    InfoTypes,
+    OutputPathParams,
+    ProgramParams,
+    UIParams,
+)
 from flysight2csv.reformatter import NothingToWriteError, Reformatter
 from flysight2csv.version import __version__
 
@@ -155,8 +163,7 @@ class Program:
         output_params: OutputPathParams = self.params.output
         merged = sum(parsed, ParsedCSV())
         merged.sort_by_timestamp()  # TODO: this might not be accurate due to the way non-GPS sensor times are parsed
-        target_path = self._get_target_path(path, rename=output_params.merged_name)
-        assert target_path.name.endswith(output_params.merged_name), target_path
+        target_path = self._get_target_path(path, rename=output_params.merged_name + path.suffix)
         self._write_reformatted(parsed=merged, target_path=target_path)
         self._display_paths(parsed=merged, source_path=path.parent / "*", target_path=target_path)
 
@@ -237,11 +244,14 @@ class Program:
         raise FileProcessingError(f"error processing {location}") from None
 
     def _get_target_path(self, source_path: Path, *, rename: str = "") -> Path:
+        extension = EXTENSIONS[self.params.reformat.output_format] or source_path.suffix
+        assert extension.startswith("."), extension
         params: OutputPathParams = self.params.output
         output_directory = params.output_directory
         assert isinstance(output_directory, Path), output_directory
         name = rename or source_path.name
-        parts = [*source_path.parts[-params.output_path_levels : -1], name]
+        new_name = name.removesuffix(source_path.suffix) + extension
+        parts = [*source_path.parts[-params.output_path_levels : -1], new_name]
         output_relative_path = params.output_path_separator.join(parts)
         target_path = output_directory / output_relative_path
         assert target_path.is_relative_to(output_directory), target_path

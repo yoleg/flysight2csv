@@ -88,7 +88,7 @@ def test_display_metadata():
                     output_path_separator="-",
                     merge=True,
                     only_merge=False,
-                    merged_name="MERGED.CSV",
+                    merged_name="MERGED",
                 ),
                 parser=ParserOptions(
                     display_path_levels=3,
@@ -121,7 +121,7 @@ def test_display_metadata():
                 "--glob-patterns=**/*.CSV",
                 "--no-merge",
                 "--only-merge",  # conflicting merge params would raise error in real program run
-                "--merged-name=MERGED2.CSV",
+                "--merged-name=MERGED2",
             ],
             ProgramParams(
                 ui=UIParams(
@@ -138,7 +138,7 @@ def test_display_metadata():
                     output_path_separator="-",
                     merge=False,
                     only_merge=True,
-                    merged_name="MERGED2.CSV",
+                    merged_name="MERGED2",
                 ),
                 parser=ParserOptions(
                     display_path_levels=3,

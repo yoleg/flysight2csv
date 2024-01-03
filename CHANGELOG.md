@@ -1,4 +1,4 @@
-# CHANGELOG 
+# CHANGELOG
 
 ## v0.2.1 (2024-01-03)
 
@@ -13,7 +13,7 @@
 * feat(flysight2csv): new cli, merge files, valid_offset flag
 
 * rewrite CLI and separate argument parsing from program logic
-* also merge reformatted SENSOR.CSV and TRACK.CSV files into a MERGED.CSV
+* also merge reformatted SENSOR.CSV and TRACK.CSV files into a MERGED.csv (or .jsonl)
 * add valid_offset flag to reformatted files (False if datetime is invalid) ([`a881dd4`](https://github.com/yoleg/flysight2csv/commit/a881dd4eb7ca02a491d266d5b5bd2745fa9b3f58))
 
 ## v0.1.1 (2023-12-30)

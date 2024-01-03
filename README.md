@@ -57,7 +57,7 @@ Functionality:
   - Available filters:
     - Select only the columns you need.
     - Select only the sensors you need.
-- Merge the reformatted files from each directory into an additional MERGED.CSV file, sorted by timestamp.
+- Merge the reformatted files from each directory into an additional MERGED.csv (or .jsonl) file, sorted by timestamp.
 
 Compatibility:
 

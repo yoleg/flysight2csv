@@ -5,7 +5,7 @@ import pytest
 
 from flysight2csv.parsed import ParsedCSV
 from flysight2csv.parser import parse_csv
-from flysight2csv.program_params import FileFormats, ParserOptions, ReformatParams
+from flysight2csv.program_params import EXTENSIONS, FileFormats, ParserOptions, ReformatParams
 from flysight2csv.reformatter import Reformatter
 from tests.common import DATA_DIR, read_raw_text, write_raw_text
 
@@ -40,14 +40,8 @@ def test_write_csv(input_filenames: list[str], expected_output_filename: str, fo
     paths = [DATA_DIR / "formatted/input/" / x for x in input_filenames]
     expected_output_data_dir = DATA_DIR / "formatted/expected/"
     assert expected_output_data_dir.is_dir()
-    extension = format_type.value.split("-")[0]
-    if format_type == FileFormats.csv_flat:
-        extension = "csv"
-    elif format_type in {FileFormats.json_lines_minimal, FileFormats.json_lines_header, FileFormats.json_lines_full}:
-        extension = "jsonl"
-    else:
-        raise NotImplementedError(format_type)
-    expected_output_path = expected_output_data_dir / format_type.value / f"{expected_output_filename}.{extension}"
+    extension = EXTENSIONS[format_type]
+    expected_output_path = expected_output_data_dir / format_type.value / f"{expected_output_filename}{extension}"
 
     merged = ParsedCSV()
     for path in paths:

@@ -63,7 +63,7 @@ Output Path:
   --only-merge          Do not write non-merged files. Conflicts with
                         --no-merge. (default: False)
   --merged-name NAME    The name of the merged file. NOTE: also affected by
-                        --output-path-levels. (default: MERGED.CSV)
+                        --output-path-levels. (default: MERGED)
 
 Reformatting:
   --format, -f {unchanged,csv-flat,json-lines-minimal,json-lines-header,json-lines-full}
