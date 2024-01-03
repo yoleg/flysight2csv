@@ -1,7 +1,5 @@
 (formats)=
 
-# Formats
-
 The possible output format are:
 
 - unchanged

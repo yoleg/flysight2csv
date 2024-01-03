@@ -31,7 +31,13 @@ For more options, see the help:
 flysight2csv --help
 ```
 
-# Help Output
+## Supported Formats
+
+```{include} ../tests/data/cli_expected/formats.txt
+
+```
+
+# Options
 
 TODO: describe these options in more detail
 
