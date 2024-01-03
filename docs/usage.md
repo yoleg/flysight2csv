@@ -9,8 +9,11 @@ Assuming that you've followed the {ref}`installations steps <installation>`, you
 The command-line syntax is:
 
 ```shell
-flysight2csv SOURCE_FILE_OR_DIRECTORY [SOURCE_FILE_OR_DIRECTORY ...] [OPTIONS]
+flysight2csv PATH [PATH ...] [OPTIONS]
 ```
+
+where `PATH` is either a directory containing FlySight 2 CSV files or a FlySight 2 CSV file. (Multiple paths can be
+specified).
 
 ## Examples
 
