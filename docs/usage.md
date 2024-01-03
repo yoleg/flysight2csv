@@ -36,7 +36,7 @@ flysight2csv --help
 ## Supported Output Formats
 
 When the `-o` (`--output-directory`) directory is specified, the files will be copied to that directory. The files will
-be renamed to include the date and time of the flight, and the file extension will be changed to `.csv`.
+be renamed to include the original directory names, and the file can be reformatted using the `--format` option.
 
 The possible output formats (`--format` option) are:
 
