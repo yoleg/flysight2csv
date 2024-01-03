@@ -1,6 +1,6 @@
 # flysight2csv
 
-<p align="center"><!-- GitHub does not support centering, so this is a hack -->
+<p align="center"><!-- GitHub does not support style="text-align: center", so this is a hack -->
   <a href="https://github.com/yoleg/flysight2csv/actions/workflows/ci.yml?query=branch%3Amain">
     <img src="https://img.shields.io/github/actions/workflow/status/yoleg/flysight2csv/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI Status" >
   </a>
