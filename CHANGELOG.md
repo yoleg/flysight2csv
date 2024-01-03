@@ -1,5 +1,11 @@
 # CHANGELOG 
 
+## v0.2.1 (2024-01-03)
+
+### Fix
+
+* fix(program): avoid merge logs on simple copy ([`049aac7`](https://github.com/yoleg/flysight2csv/commit/049aac750be99d402589bc1f7001eaa441001fe2))
+
 ## v0.2.0 (2024-01-01)
 
 ### Feature
@@ -12,11 +18,13 @@
 
 ## v0.1.1 (2023-12-30)
 
-### Feature
-
-* feat(flysight2csv): initial release ([`566d748`](https://github.com/yoleg/flysight2csv/commit/566d7487b1873485ea43a71a34fe40e10040b4f4))
-
 ### Fix
 
 * fix(parser): fix duplicate time column names ([`1a86835`](https://github.com/yoleg/flysight2csv/commit/1a86835b108ae754d065d1757b184c1735a698ba))
+
+## v0.1.0 (2023-12-29)
+
+### Feature
+
+* feat(flysight2csv): initial release ([`566d748`](https://github.com/yoleg/flysight2csv/commit/566d7487b1873485ea43a71a34fe40e10040b4f4))
 
