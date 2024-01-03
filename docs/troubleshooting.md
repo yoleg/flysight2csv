@@ -13,7 +13,8 @@ See also the [pip documentation](https://pip.pypa.io/en/stable/installation/).
 
 ### Unexpected exceptions or errors
 
-Report bugs to [the flysight2csv issue page][gh-issues]. If you are reporting a bug, the following would be helpful:
+Report bugs to [the flysight2csv issue page](https://github.com/yoleg/flysight2csv/issues). If you are reporting a bug,
+the following would be helpful:
 
 - Your operating system name and version
 - Output of `flysight2csv --version`
