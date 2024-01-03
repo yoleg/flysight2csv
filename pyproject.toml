@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flysight2csv"
-version = "0.2.2"
+version = "0.2.3"
 description = "Utilities for finding and reformatting FlySight 2 CSV files (SENSOR.CSV and TRACK.CSV)."
 authors = ["Oleg Pryadko <oleg@olegpryadko.com>"]
 license = "MIT"

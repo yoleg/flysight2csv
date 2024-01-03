@@ -1,5 +1,11 @@
 # CHANGELOG 
 
+## v0.2.3 (2024-01-03)
+
+### Fix
+
+* fix(flysight2csv): clarify ambiguous arg name ([`4c08389`](https://github.com/yoleg/flysight2csv/commit/4c083898d51463340c7f717ba92ea8734aa9f562))
+
 ## v0.2.2 (2024-01-03)
 
 ### Fix
