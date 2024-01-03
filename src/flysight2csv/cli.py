@@ -94,9 +94,14 @@ def get_argument_parser() -> Tuple[argparse.ArgumentParser, dict[str, ArgumentGr
     # ParserOptions Section
     parser_group = parser.add_argument_group("Parser Options")
     parser_group.add_argument(
-        "--display-path-levels", metavar="INT", type=int, default=3, help="The number of path levels to display."
+        "--field-path-levels",
+        metavar="INT",
+        type=int,
+        default=3,
+        dest="display_path_levels",
+        help="The number of path levels to display in the file_path metadata field (added to the data).",
     )
-    parser_group.add_argument("--metadata-only", action="store_true", help="Display metadata only.")
+    parser_group.add_argument("--metadata-only", action="store_true", help="Stop parsing after the first data row.")
     parser_group.add_argument(
         "--offset-datetime",
         metavar="DATETIME",
