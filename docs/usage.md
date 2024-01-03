@@ -54,10 +54,10 @@ the [formatted test data](https://github.com/yoleg/flysight2csv/tree/main/tests/
 
 TODO: describe these options in more detail
 
-<pre>
+<div style="font-family: monospace">
 
 ```{include} ../tests/data/cli_expected/help.txt
 
 ```
 
-</pre>
+</div>
