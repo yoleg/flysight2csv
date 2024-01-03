@@ -55,7 +55,9 @@ the [formatted test data](https://github.com/yoleg/flysight2csv/tree/main/tests/
 TODO: describe these options in more detail
 
 <pre>
+
 ```{include} ../tests/data/cli_expected/help.txt
 
 ```
+
 </pre>
