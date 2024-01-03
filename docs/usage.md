@@ -68,10 +68,8 @@ The reformatted files can be analyzed with any tools that support CSV or JSONL f
 
 TODO: describe these options in more detail
 
-<div style="font-family: monospace; white-space: pre">
-
-```{include} ../tests/data/cli_expected/help.txt
-
+```{literalinclude} ../tests/data/cli_expected/help.txt
+---
+language: shell
+---
 ```
-
-</div>
