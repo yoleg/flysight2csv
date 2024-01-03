@@ -4,11 +4,20 @@
 
 ### Command not found
 
-If the `flysight2csv` command is not available after you have installed it, make sure you have installed it in the same
-Python environment you are using to run the command. For example, if you have both Python 3.12 and Python 3.10
-installed, you may need to run `pip3.12 install flysight2csv` or `py -3.12 -m pip install flysight2csv` to install it
-for Python 3.12.
+If you are using a virtual environment, make sure you have activated it before running the command. Similarly, if you
+have multiple versions of Python installed, make sure you are using the same version you installed it with.
 
-You can also try running `python -m flysight2csv` instead of `flysight2csv`.
+Try running `python -m flysight2csv` instead of `flysight2csv` to get around `PATH` issues.
 
-Finally, if you are using a virtual environment, make sure you have activated it before running the command.
+See also the [pip documentation](https://pip.pypa.io/en/stable/installation/).
+
+### Unexpected exceptions or errors
+
+Report bugs to [the flysight2csv issue page][gh-issues]. If you are reporting a bug, the following would be helpful:
+
+- Your operating system name and version
+- Output of `flysight2csv --version`
+- Output when the same command is rerun with the `--tracebacks` option.
+- Detailed steps to reproduce the bug.
+
+If possible, please include a copy of the file(s) that caused the error.

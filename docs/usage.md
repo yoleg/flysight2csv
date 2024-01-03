@@ -4,7 +4,13 @@
 
 Assuming that you've followed the {ref}`installations steps <installation>`, you're now ready to use this package.
 
-**Please note that this is an early release, and the API may change in future versions.**
+💡 **Please note that this is an early release, and the API may change in future versions.**
+
+The command-line syntax is:
+
+```shell
+flysight2csv SOURCE_FILE_OR_DIRECTORY [SOURCE_FILE_OR_DIRECTORY ...] [OPTIONS]
+```
 
 ## Examples
 

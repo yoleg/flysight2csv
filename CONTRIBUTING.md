@@ -8,11 +8,14 @@ You can contribute in many ways:
 
 ### Report Bugs
 
-Report bugs to [our issue page][gh-issues]. If you are reporting a bug, please include:
+Report bugs to [the flysight2csv issue page][gh-issues]. If you are reporting a bug, the following would be helpful:
 
-- Your operating system name and version.
-- Any details about your local setup that might be helpful in troubleshooting.
+- Your operating system name and version
+- Output of `flysight2csv --version`
+- Output when the same command is rerun with the `--tracebacks` option.
 - Detailed steps to reproduce the bug.
+
+If possible, please include a copy of the file(s) that caused the error.
 
 ### Fix Bugs
 
