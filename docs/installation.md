@@ -21,6 +21,6 @@ Once that completes, reopen your terminal and run `flysight2csv --help` to confi
 
 💡 Additional help with `pip` is available at the [pip documentation](https://pip.pypa.io/en/stable/installation/).
 
-See also the {ref}`<troubleshooting> section`.
+See also the {ref}`troubleshooting section <troubleshooting>`.
 
 Next, see the {ref}`section about usage <usage>` to see how to use it.

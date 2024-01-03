@@ -15,13 +15,13 @@ flysight2csv source/files/or/directories/
 flysight2csv source/files/or/directories/ --info=metadata
 ```
 
-Copy the files to a new directory, prepending the date and time to the filename:
+Copy just the TRACK.CSV files (unchanged) to a single directory, prepending the date and time to the filename:
 
 ```shell
-flysight2csv source/files/or/directories/ -o output/path/
+flysight2csv source/files/or/directories/ -o output/path/ '--glob=**/TRACK.CSV'
 ```
 
-Reformat the copied files into a "flat" CSV (single header) for use with other tools:
+Reformat all the FlySight 2 CSVs into a "flat" CSV (single header) for use with other tools:
 
 ```shell
 flysight2csv source/files/or/directories/ -o output/path/ -f csv-flat
@@ -42,19 +42,19 @@ The possible output formats (`--format` option) are:
 
 - `unchanged` (default)
   - NOTE: this disables merging, filtering, etc... and just copies the files
-- `csv-flat`
-- `json-lines-minimal`
-- `json-lines-header`
-- `json-lines-full`
+- `csv-flat` - a CSV file with a single header row
+- `json-lines-minimal` - one JSON object per line, with only the fields relevant to each row
+- `json-lines-header` - one JSON object per line, with a header row at the top of all the fields set to null
+- `json-lines-full` - one JSON object per line, with the same fields in each object (set to null if not relevant)
 
 Examples of each format are available in
 the [formatted test data](https://github.com/yoleg/flysight2csv/tree/main/tests/data/formatted/expected) folder.
 
-## Command-line Parameters
+## ALl Command-line Parameters
 
 TODO: describe these options in more detail
 
-<div style="font-family: monospace">
+<div style="font-family: monospace; white-space: pre">
 
 ```{include} ../tests/data/cli_expected/help.txt
 
