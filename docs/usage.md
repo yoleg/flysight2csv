@@ -37,12 +37,12 @@ flysight2csv --help
 
 ```
 
-## Options
+## Command-line Parameters
 
 TODO: describe these options in more detail
 
-```
+<pre>
 ```{include} ../tests/data/cli_expected/help.txt
 
 ```
-```
+</pre>
