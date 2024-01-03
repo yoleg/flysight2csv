@@ -6,7 +6,6 @@
 
 installation
 usage
-formats
 troubleshooting
 ```
 
