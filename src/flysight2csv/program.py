@@ -135,6 +135,8 @@ class Program:
     def _process_merge(self, dir_path: Path, parsed: list[ParsedCSV], paths: list[Path]) -> None:
         if not self.params.output.output_directory:
             return
+        if self.params.reformat.output_format == FileFormats.unchanged:
+            return
 
         if not self.params.output.merge:
             if self.params.output.only_merge:
@@ -142,7 +144,7 @@ class Program:
             return
 
         if len(paths) == 1:
-            self._warn(f"Only one file found in {dir_path}. Skipping merge.")
+            logging.info(f"Only one file matched in {dir_path}. Skipping merge.")
             return
 
         if not all(x.meta.vars == parsed[0].meta.vars for x in parsed):

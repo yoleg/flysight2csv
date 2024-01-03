@@ -69,6 +69,7 @@ exclude_commit_patterns = [
     "ci*",
     "refactor*",
     "test*",
+    "doc*",
 ]
 
 [tool.semantic_release.changelog.environment]

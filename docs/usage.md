@@ -30,3 +30,11 @@ For more options, see the help:
 ```shell
 flysight2csv --help
 ```
+
+# Help Output
+
+TODO: describe these options in more detail
+
+```{include} ../tests/data/cli_expected/help.txt
+
+```
