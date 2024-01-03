@@ -34,13 +34,24 @@ class Parser:
     """Parser for a single FlySight 2 CSV file."""
 
     GPS_START_DATE = datetime(1980, 1, 6, 0, 0, 0)
-    EXPECTED_HEADER = "$FLYS,1"
+    EXPECTED_FILE_TYPE = "$FLYS"
+    EXPECTED_FILE_VERSION = "1"
     LINE_TYPE_PATTERN = re.compile(r"^\$[A-Z]+$")
     ROW_COL = "$COL"
     ROW_DATA = "$DATA"
     ROW_UNIT = "$UNIT"
     ROW_VAR = "$VAR"
     ROW_TIME = "$TIME"
+
+    @classmethod
+    def is_expected_header_line(cls, line: str) -> bool:
+        """Accept the exact header and variants padded with empty trailing CSV fields."""
+        line_type, *row_fields = line.split(",")
+        if line_type != cls.EXPECTED_FILE_TYPE:
+            return False
+        if not row_fields or row_fields[0] != cls.EXPECTED_FILE_VERSION:
+            return False
+        return True
 
     def __init__(self, path: str | PurePath, options: ParserOptions):
         """Initialize a FlySight2CSVParser."""
@@ -117,8 +128,11 @@ class Parser:
         self.state.current_line_number += 1
 
         if self.state.current_line_number == 1:
-            self.parsed.meta.is_flysight2_file = line == self.EXPECTED_HEADER
-            self._error_if(not self.parsed.meta.is_flysight2_file, f"First line is not {self.EXPECTED_HEADER!r}")
+            self.parsed.meta.is_flysight2_file = self.is_expected_header_line(line)
+            self._error_if(
+                not self.parsed.meta.is_flysight2_file,
+                f"First line does not start with '{self.EXPECTED_FILE_TYPE},{self.EXPECTED_FILE_VERSION}'",
+            )
             return None
 
         if not line.strip():
@@ -175,7 +189,7 @@ class Parser:
 
         if line_type == self.ROW_DATA:
             self._error_if(self.parsed.meta.complete_header, f"Duplicate {self.ROW_DATA} line.")
-            self._error_if(bool(row_fields), f"Unexpected {self.ROW_DATA} line with fields.")
+            self._error_if(any(row_fields), f"Unexpected {self.ROW_DATA} line with fields.")
             self.parsed.meta.complete_header = True
             return
 

@@ -288,6 +288,17 @@ def test_track_negative_milliseconds():
     ], "it should have parsed the timestamps and other data correctly"
 
 
+def test_track_header_with_trailing_commas():
+    path = DATA_DIR / "individual/new-format-TRACK.csv"
+    parsed = parse_csv(path=path, options=DEFAULT_OPTIONS)
+
+    assert parsed.meta.is_flysight2_file is True
+    assert parsed.meta.complete_header is True
+    assert parsed.format_errors == []
+    assert len(parsed.rows) == 17
+    assert all(row.meta.sensor_name == "GNSS" for row in parsed.rows)
+
+
 def test_merge():
     options = DEFAULT_OPTIONS.model_copy()
     options.display_path_levels = 2
@@ -397,7 +408,7 @@ def test_not_a_csv():
     options.display_path_levels = 1
     parser = parse_csv_returning_parser(path, options)
     assert parser.state.ignored_messages == [
-        "First line is not '$FLYS,1'",
+        "First line does not start with '$FLYS,1'",
         "No $VAR metadata found.",
         "No columns found.",
         "No units found.",

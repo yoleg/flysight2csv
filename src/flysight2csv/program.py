@@ -95,7 +95,7 @@ class Program:
             try:
                 with open(path) as fd:
                     header = fd.read(1024 * 1024).splitlines(keepends=False)[0]
-                is_flysight2_file = header == Parser.EXPECTED_HEADER
+                is_flysight2_file = Parser.is_expected_header_line(header)
                 if not is_flysight2_file:
                     self._warn(f"Not a FlySight 2 CSV file. Skipping: {path}")
                     continue
