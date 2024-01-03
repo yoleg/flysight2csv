@@ -32,9 +32,11 @@
 
 ---
 
-**Documentation**: <a href="https://flysight2csv.readthedocs.io" target="_blank">https://flysight2csv.readthedocs.io </a>
+**Documentation
+**: <a href="https://flysight2csv.readthedocs.io" target="_blank">https://flysight2csv.readthedocs.io </a>
 
-**Source Code**: <a href="https://github.com/yoleg/flysight2csv" target="_blank">https://github.com/yoleg/flysight2csv </a>
+**Source Code
+**: <a href="https://github.com/yoleg/flysight2csv" target="_blank">https://github.com/yoleg/flysight2csv </a>
 
 ---
 
@@ -87,7 +89,7 @@ pip install flysight2csv
 ```
 
 For complete installation instructions, see
-the [documentation](https://flysight2csv.readthedocs.io/latest/installation.html).
+the [installation documentation](https://flysight2csv.readthedocs.io/latest/installation.html).
 
 ## Usage
 
@@ -112,11 +114,8 @@ Reformat all the FlySight 2 CSVs into a "flat" CSV (single header) for use with 
 flysight2csv source/files/or/directories/ -o output/path/ -f csv-flat
 ```
 
-For more options, see the help:
-
-```shell
-flysight2csv --help
-```
+To see all available options, run `flysight2csv --help` or see
+the [documentation](https://flysight2csv.readthedocs.io/latest/usage.html).
 
 ## Troubleshooting
 
