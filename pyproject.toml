@@ -8,7 +8,7 @@ readme = "README.md"
 repository = "https://github.com/yoleg/flysight2csv"
 documentation = "https://flysight2csv.readthedocs.io"
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "Intended Audience :: End Users/Desktop",
