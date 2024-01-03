@@ -1,5 +1,5 @@
 Usage: flysight2csv [-h] [--version] [--glob PATTERN [PATTERN ...]]
-                    [-i {none,path,metadata}] [--display-path-levels INT]
+                    [-i {none,path,metadata}] [--field-path-levels INT]
                     [--metadata-only] [--offset-datetime DATETIME]
                     [--continue-on-format-error] [--ignore-all-format-errors]
                     [--ignored-format-errors MESSAGE [MESSAGE ...]]
@@ -34,9 +34,11 @@ File Discovery:
                         discovered file. (default: path)
 
 Parser Options:
-  --display-path-levels INT
-                        The number of path levels to display. (default: 3)
-  --metadata-only       Display metadata only. (default: False)
+  --field-path-levels INT
+                        The number of path levels to display in the file_path
+                        metadata field (added to the data). (default: 3)
+  --metadata-only       Stop parsing after the first data row. (default:
+                        False)
   --offset-datetime DATETIME
                         Force this offset datetime instead of auto-detecting
                         from $TIME columns. (default: None)
