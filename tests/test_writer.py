@@ -9,6 +9,8 @@ from flysight2csv.program_params import FileFormats, ParserOptions, ReformatPara
 from flysight2csv.reformatter import Reformatter
 from tests.common import DATA_DIR, read_raw_text, write_raw_text
 
+WRITE_EXPECTED = False  # Set this to true temporarily to update expected output files.
+
 PARSER_OPTIONS = ParserOptions(
     display_path_levels=1,
     metadata_only=False,
@@ -23,7 +25,6 @@ DEFAULT_PARAMS = ReformatParams(
     sensors_select=None,
     columns_select=None,
 )
-WRITE_EXPECTED = False  # Set this to true temporarily to update expected output files.
 
 
 @pytest.mark.parametrize(
@@ -34,13 +35,19 @@ WRITE_EXPECTED = False  # Set this to true temporarily to update expected output
         pytest.param(["TRACK.CSV", "SENSOR.CSV"], "merged", id="merged"),
     ],
 )
-@pytest.mark.parametrize("format_type", ["csv-flat", "jsonl-minimal", "jsonl-header", "jsonl-full"])
-def test_write_csv(input_filenames, expected_output_filename: str, format_type: str):
+@pytest.mark.parametrize("format_type", [x for x in FileFormats if x != FileFormats.unchanged])
+def test_write_csv(input_filenames: list[str], expected_output_filename: str, format_type: FileFormats):
     paths = [DATA_DIR / "formatted/input/" / x for x in input_filenames]
     expected_output_data_dir = DATA_DIR / "formatted/expected/"
     assert expected_output_data_dir.is_dir()
-    extension = format_type.split("-")[0]
-    expected_output_path = expected_output_data_dir / format_type / f"{expected_output_filename}.{extension}"
+    extension = format_type.value.split("-")[0]
+    if format_type == FileFormats.csv_flat:
+        extension = "csv"
+    elif format_type in {FileFormats.json_lines_minimal, FileFormats.json_lines_header, FileFormats.json_lines_full}:
+        extension = "jsonl"
+    else:
+        raise NotImplementedError(format_type)
+    expected_output_path = expected_output_data_dir / format_type.value / f"{expected_output_filename}.{extension}"
 
     merged = ParsedCSV()
     for path in paths:
@@ -50,13 +57,13 @@ def test_write_csv(input_filenames, expected_output_filename: str, format_type: 
 
     string_io = io.StringIO()
     writer = Reformatter(merged, params=DEFAULT_PARAMS)
-    if format_type == "csv-flat":
+    if format_type == FileFormats.csv_flat:
         writer.write_csv(string_io)
-    elif format_type == "jsonl-minimal":
+    elif format_type == FileFormats.json_lines_minimal:
         writer.write_json_lines(string_io, fill_nulls=False, header=False)
-    elif format_type == "jsonl-header":
+    elif format_type == FileFormats.json_lines_header:
         writer.write_json_lines(string_io, fill_nulls=False, header=True)
-    elif format_type == "jsonl-full":
+    elif format_type == FileFormats.json_lines_full:
         writer.write_json_lines(string_io, fill_nulls=True, header=False)
     else:
         raise NotImplementedError(extension)
