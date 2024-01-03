@@ -50,7 +50,7 @@ The possible output formats (`--format` option) are:
 Examples of each format are available in
 the [formatted test data](https://github.com/yoleg/flysight2csv/tree/main/tests/data/formatted/expected) folder.
 
-## ALl Command-line Parameters
+## All Command Line Options
 
 TODO: describe these options in more detail
 
