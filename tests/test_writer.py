@@ -68,7 +68,9 @@ def test_write_csv(input_filenames: list[str], expected_output_filename: str, fo
         pytest.fail("Expected output file was updated. Please revert WRITE_EXPECTED to False.")
 
     expected = read_raw_text(expected_output_path)
-    if extension != "csv":  # CSV files by default write \r\n on any OS. TODO: should this change?
+    if extension == ".csv":  # CSV files by default write \r\n on any OS. TODO: should this change?
+        assert "\r\n" in expected
+    else:
         expected = expected.replace("\r\n", os.linesep)
     expected_lines = expected.splitlines(keepends=True)
     actual_lines = read_raw_text(string_io).splitlines(keepends=True)

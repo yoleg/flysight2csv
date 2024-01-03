@@ -73,9 +73,14 @@ def test_common_reformat(tmpdir: py.path.local, monkeypatch, format_type: FileFo
     for path in output_dir.glob("**/*.*"):
         assert path.is_file()
         suffix = path.name.rsplit("-", 1)[-1]
-        expected: Path = expected_data_dir / suffix.lower()
+        expected_path: Path = expected_data_dir / suffix.lower()
         actual_lines = read_raw_text(path).splitlines(keepends=True)
-        expected_lines = read_raw_text(expected).splitlines(keepends=True)
+        expected = read_raw_text(expected_path)
+        if expected_path.suffix == ".csv":  # CSV files by default write \r\n on any OS. TODO: should this change?
+            assert "\r\n" in expected
+        else:
+            expected = expected.replace("\r\n", os.linesep)
+        expected_lines = expected.splitlines(keepends=True)
         assert actual_lines[:10] == expected_lines[:10]
     console_output = string_io.getvalue()
     console_output = console_output.replace(str(output_dir), "<output_dir>")
