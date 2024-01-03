@@ -48,7 +48,7 @@ Functionality:
 
 - Find all the FlySight 2 CSV files in one or more directories or possible file paths.
 - View metadata (vars, sensors, columns, units, and first row) for each CSV file.
-- Copy the files to a directory, prepending the parent directory names to the filename.
+- Copy matching files to a single directory, prepending the parent directory names to the filename.
 - Reformat the CSV files for easier use with other tools, such as Pandas dataframes.
   - Calculates ISO timestamps for non-GPS sensors from $TIME field values, if available.
   - Available formats:
@@ -69,19 +69,11 @@ Compatibility:
 
 Let me know if you would like to see any of these added.
 
-Discovery:
-
 - Filter the CSV files by date/time, altitude, or other criteria.
 - Show a summary of date ranges and altitudes for the discovered CSV files.
-
-Reformatting:
-
 - Add units to the flattened CSV files.
 - FlySight 1 output format.
 - Trim the CSV files to just the descent or ascent portion of a flight.
-
-Misc:
-
 - Installers for Windows, Mac, and Linux.
 - Simple graphical user interface (GUI) for selecting options and running the command.
 
@@ -108,13 +100,13 @@ flysight2csv source/files/or/directories/
 flysight2csv source/files/or/directories/ --info=metadata
 ```
 
-Copy the files to a new directory, prepending the date and time to the filename:
+Copy just the TRACK.CSV files (unchanged) to a single directory, prepending the date and time to the filename:
 
 ```shell
-flysight2csv source/files/or/directories/ -o output/path/
+flysight2csv source/files/or/directories/ -o output/path/ '--glob=**/TRACK.CSV'
 ```
 
-Reformat the copied files into a "flat" CSV (single header) for use with other tools:
+Reformat all the FlySight 2 CSVs into a "flat" CSV (single header) for use with other tools:
 
 ```shell
 flysight2csv source/files/or/directories/ -o output/path/ -f csv-flat
