@@ -50,6 +50,20 @@ The possible output formats (`--format` option) are:
 Examples of each format are available in
 the [formatted test data](https://github.com/yoleg/flysight2csv/tree/main/tests/data/formatted/expected) folder.
 
+## Compatible Tools
+
+The reformatted files can be analyzed with any tools that support CSV or JSONL file formats, such as:
+
+- [Pandas](https://pandas.pydata.org/) (Python) - e.g. in a [Jupyter notebook](https://jupyter.org/) (author's choice)
+- [csvkit](https://csvkit.readthedocs.io/) (command line)
+- [jq](https://stedolan.github.io/jq/) (command line)
+- [Google Sheets](https://sheets.google.com/) (web)
+- [Google Looker Studio](https://lookerstudio.google.com/) (web)
+- [LibreOffice Calc](https://www.libreoffice.org/discover/calc/) (Windows, macOS, Linux)
+- [OpenOffice Calc](https://www.openoffice.org/product/calc.html) (Windows, macOS, Linux)
+- [Numbers](https://www.apple.com/numbers/) (macOS)
+- [Excel](https://www.microsoft.com/en-us/microsoft-365/excel) (Windows, macOS)
+
 ## All Command Line Options
 
 TODO: describe these options in more detail
