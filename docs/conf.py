@@ -7,7 +7,7 @@
 project = "flysight2csv"
 copyright = "2023, Oleg Pryadko"
 author = "Oleg Pryadko"
-release = "0.2.3"
+release = "0.2.4"
 
 # General configuration
 extensions = [
