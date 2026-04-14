@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import py
+from pydantic import ValidationError
 import pytest
 
 from flysight2csv.program import Program
@@ -103,3 +104,9 @@ def test_common_reformat(tmpdir: py.path.local, monkeypatch, format_type: FileFo
             "[blue]<data_dir>/formatted/input/*[/blue] -> "
             "[cyan]<output_dir>/MERGED.jsonl[/cyan] (json-lines-minimal)",
         ]
+
+
+def test_params_validate_assignment_still_enabled():
+    params = DEFAULTS.model_copy(deep=True)
+    with pytest.raises(ValidationError):
+        params.parser.display_path_levels = -1

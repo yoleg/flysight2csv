@@ -5,7 +5,7 @@ from enum import Enum
 from pathlib import Path, PurePath
 from typing import Any
 
-from pydantic import BaseModel, Field, NaiveDatetime, field_validator
+from pydantic import BaseModel, ConfigDict, Field, NaiveDatetime, field_validator
 
 from flysight2csv.selection import StringSelection
 
@@ -13,9 +13,7 @@ from flysight2csv.selection import StringSelection
 class BaseParams(BaseModel):
     """A base class for parameter dataclasses."""
 
-    class Config:
-        """Pydantic configuration."""
-        validate_assignment = True
+    model_config = ConfigDict(validate_assignment=True)
 
 
 class ProgramParams(BaseParams):
