@@ -1,0 +1,7 @@
+# [copilot] Documentation build requirements for Read the Docs.
+# sphinx is pinned to <9 because myst-parser 4.x requires sphinx>=7,<9.
+sphinx>=8,<9
+myst-parser>=4.0,<5
+furo>=2023.5.20
+sphinx-autobuild>=2021.3.14
+
